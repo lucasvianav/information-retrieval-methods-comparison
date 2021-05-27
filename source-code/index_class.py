@@ -9,18 +9,22 @@ class Index:
 
     Parameters:
         database_contents (dict): a dictonary with the database documents' names as keys and it's full contents (string) as values.
+        filter_stopwords (bool): if true, all of the query stopwords will be ignored.
+        stem_words (bool): if true, all of the query words will be lemmatized and stemmed.
 
     Return value:
         Index, if the passed parameters are valid.
         None, if not.
     """
 
-    def __init__(self, database_contents: dict): 
+    def __init__(self, database_contents: dict, filter_stopwords: bool, stem_words: bool): 
         """
         The constructor for the Index class.
 
         Parameters:
             database_contents (dict): a dictonary with the database documents' names as keys and it's full contents (string) as values.
+            filter_stopwords (bool): if true, all of the query stopwords will be ignored.
+            stem_words (bool): if true, all of the query words will be lemmatized and stemmed.
 
         Return value:
             Index, if the passed parameters are valid.
@@ -37,7 +41,7 @@ class Index:
             if type(content) is not str: return None
 
             # parses the content text and stores it
-            words = parse_text(content)
+            words = parse_text(content, filter_stopwords, stem_words)
             words_in_doc[file] = words
 
         # # sorts by doc
@@ -49,37 +53,36 @@ class Index:
         # keys --> words (sorted)
         # values --> list of dicts containing the doc name and the word frequency in that doc (sorted by doc)
         self.posting_list = { 
-            word: sorted(
-                list(
-                    map(
-                        lambda doc: { 'doc': doc[0], 'freq': doc[1].count(word) },
-                        filter( lambda doc: word in doc[1], words_in_doc.items() )
-                    )
-                ), 
-
-                key=lambda e: e['doc']
-            )
-
-            for word in all_words 
+            word: [ 
+                { 'doc': name, 'freq': words.count(word) } 
+                for name, words in sorted(words_in_doc.items(), key=lambda e: e[0]) 
+                if word in words 
+            ] for word in all_words 
         }
         
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
         self.words_in_doc = words_in_doc
 
+        self.filter_stopwords = filter_stopwords
+        self.stem_words = stem_words
+
     def add_docs_to_word(self, word: str, posting_list: list) -> None:
         """
-        The constructor for the Index class.
+        Method to include a list of docs into a word's posting list.
 
         Parameters:
-            word (str): the target-word.
+            word (str): the target-word (if it's a stopword, it may be ignored).
             posting_list (list): a list containing dicts with the 'doc' as key and the doc name as value (str), as well as 'freq' as key and that word's frequency in the doc as value (int).
 
         Return value: None.
         """
+        
+        # if the word is a stopword, ignore it
+        if word in STOP_WORDS and self.filter_stopwords: return
 
         # if the word is not yet present in the index, adds it
-        if word not in self.posting_list.keys(): self.posting_list[word] = []
+        elif word not in self.posting_list.keys(): self.posting_list[word] = []
 
         # loops through the posting list
         for e in posting_list:
