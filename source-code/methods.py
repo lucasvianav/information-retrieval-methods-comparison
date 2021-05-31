@@ -94,9 +94,7 @@ def vectorialModel(query: list, index: Index) -> list:
     """
     
     number_of_documents_in_database = index.get_n_docs()
-    # falta escrever uma funcao para retornar
-    # uma lista com unique_words no BD
-    unique_words = index.get_unique_words()
+    unique_words = index.get_all_words()
     number_of_unique_words = len(unique_words)
     doc_mapping = index.get_doc_mapping()
 

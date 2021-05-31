@@ -53,7 +53,7 @@ class Index:
         # words_in_doc = dict(sorted(words_in_doc.items(), key=lambda e: e[0]))
 
         # list containing every word processed (sorted and no repetition)
-        all_words = set(extract_lists(words_in_doc.values()))
+        self.all_words = set(extract_lists(words_in_doc.values()))
 
         # keys --> words (sorted)
         # values --> list of dicts containing the doc name and the word frequency in that doc (sorted by doc)
@@ -69,7 +69,7 @@ class Index:
                 key=lambda e: e['doc']
             )
 
-            for word in all_words 
+            for word in self.all_words 
         }
         
         # keys --> doc name
@@ -183,7 +183,7 @@ class Index:
         Return value:
             int: number of words contained by the target-doc.
         """
-        !!!!!!!!!!!!!!!!!!!!!! documentacao errada... !!!!!!!!!!!!!!!!!!!!!
+        
 
         return len(set(self.words_in_doc[doc])) if doc in self.words_in_doc.keys() else 0
 
@@ -247,3 +247,12 @@ class Index:
             list: all names of documents in index class
         """
         return self.doc_mapping
+
+    def get_all_words(self) -> list:
+        """
+        getter of all_words list of index class
+
+        Return value:
+            list: containing every word processed (sorted and no repetition)
+        """
+        return self.all_words
