@@ -22,7 +22,8 @@ def get_db_content() -> dict:
 
     # loops through all files
     for filename in files:
-        with open(filename, 'r') as file: contents[filename.replace(DATABASE_DIRECTORY_PATH, '')] = file.read()
+        with open(filename, 'r') as file: 
+            contents[filename.replace(DATABASE_DIRECTORY_PATH, '')] = file.read()
 
     return contents
 

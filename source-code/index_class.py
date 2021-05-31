@@ -30,6 +30,10 @@ class Index:
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
         words_in_doc = {}
+        
+        # list of documents in database
+        self.doc_mapping = []
+        
 
         # loops through each file and it's contents
         for file, content in database_contents.items():
@@ -39,6 +43,11 @@ class Index:
             # parses the content text and stores it
             words = parse_text(content)
             words_in_doc[file] = words
+            
+            # append document to doc_mapping
+            self.doc_mapping.append(file)
+
+    
 
         # # sorts by doc
         # words_in_doc = dict(sorted(words_in_doc.items(), key=lambda e: e[0]))
@@ -66,6 +75,7 @@ class Index:
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
         self.words_in_doc = words_in_doc
+
 
     def add_docs_to_word(self, word: str, posting_list: list) -> None:
         """
@@ -96,6 +106,7 @@ class Index:
             else: doc_freq['freq'] += e['freq']
             finally: self.posting_list[word].sort(key=lambda e: e['doc'])
 
+
     def get_posting_list(self, word: str) -> list: 
         """
         The getter for the posting list of a word.
@@ -104,7 +115,11 @@ class Index:
             word (str): the target-word.
 
         Return value:
-            list: the posting list contains dicts with the 'doc' as key and the doc name as value (str), as well as 'freq' as key and that word's frequency in the doc as value (int) - lists all docs that contain the target-word.
+            list: the posting list contains dicts with the 'doc'
+                  as key and the doc name as value (str), as well
+                  as 'freq' as key and that word's frequency in the 
+                  doc as value (int) - lists all docs that contain 
+                  the target-word.
         """
 
         return self.posting_list[word] if word in self.posting_list.keys() else []
@@ -168,6 +183,7 @@ class Index:
         Return value:
             int: number of words contained by the target-doc.
         """
+        !!!!!!!!!!!!!!!!!!!!!! documentacao errada... !!!!!!!!!!!!!!!!!!!!!
 
         return len(set(self.words_in_doc[doc])) if doc in self.words_in_doc.keys() else 0
 
@@ -222,3 +238,12 @@ class Index:
         return_list = sorted(self.words_in_doc.items(), key=lambda e: e[0])
 
         return return_list if not dict else list(map(lambda e: { 'doc': e[0], 'words': e[1] }, return_list))
+
+    def get_doc_mapping(self) -> list:
+        """
+        getter of doc_mapping list of index class
+
+        Return value:
+            list: all names of documents in index class
+        """
+        return self.doc_mapping
