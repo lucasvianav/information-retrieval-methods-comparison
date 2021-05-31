@@ -96,7 +96,7 @@ def vectorialModel(query: list, index: Index) -> list:
     number_of_documents_in_database = index.get_n_docs()
     unique_words = index.get_all_words()
     number_of_unique_words = len(unique_words)
-    doc_mapping = index.get_doc_mapping()
+    doc_mapping = index.get_all_docs_names()
 
     # creating TDM (Term Document Matrix)
     tdm = np.zeros((number_of_unique_words, number_of_documents_in_database))

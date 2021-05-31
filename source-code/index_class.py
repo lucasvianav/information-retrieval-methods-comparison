@@ -30,10 +30,6 @@ class Index:
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
         words_in_doc = {}
-        
-        # list of documents in database
-        self.doc_mapping = []
-        
 
         # loops through each file and it's contents
         for file, content in database_contents.items():
@@ -43,9 +39,6 @@ class Index:
             # parses the content text and stores it
             words = parse_text(content)
             words_in_doc[file] = words
-            
-            # append document to doc_mapping
-            self.doc_mapping.append(file)
 
     
 
@@ -76,7 +69,6 @@ class Index:
         # values --> list of all words in that doc (with repetitions)
         self.words_in_doc = words_in_doc
 
-
     def add_docs_to_word(self, word: str, posting_list: list) -> None:
         """
         The constructor for the Index class.
@@ -105,7 +97,6 @@ class Index:
             except StopIteration: self.posting_list[word].append(e.copy())
             else: doc_freq['freq'] += e['freq']
             finally: self.posting_list[word].sort(key=lambda e: e['doc'])
-
 
     def get_posting_list(self, word: str) -> list: 
         """
@@ -226,7 +217,7 @@ class Index:
 
     def get_all_docs(self, dict=False) -> list: 
         """
-        The getter for all of the docs in the databse (returning both the doc's name and words),
+        The getter for all of the docs in the database (returning both the doc's name and words).
 
         Parameters:
             dict (bool): if true, the returned value will be a list of {'doc': DOC_NAME, 'words': DOC_WORDS}, if false it'll be a list of (DOC_NAME, DOC_WORDS).
@@ -239,14 +230,14 @@ class Index:
 
         return return_list if not dict else list(map(lambda e: { 'doc': e[0], 'words': e[1] }, return_list))
 
-    def get_doc_mapping(self) -> list:
+    def get_all_docs_names(self) -> list:
         """
-        getter of doc_mapping list of index class
+        The getter for all of the docs in the database (returning only their names).
 
         Return value:
-            list: all names of documents in index class
+            list: all names of documents in the Index.
         """
-        return self.doc_mapping
+        return sorted(self.words_in_doc.keys())
 
     def get_all_words(self) -> list:
         """
