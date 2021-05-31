@@ -1,8 +1,8 @@
 from glob import glob
-from re import sub
 from nltk.stem import WordNetLemmatizer
 from nltk import download, word_tokenize
 from functools import reduce
+import re
 
 # download('punkt')
 # download('wordnet')
@@ -13,8 +13,14 @@ def get_db_content() -> dict:
     """
     Loops through all files in the database (data/) and reads their contents, returning it as a doc-content object.
 
+    This method will parse documents marked up using the following tags:
+        <DOC>: Starting tag of a document.
+        <DOCNO> </DOCNO>: Contains document identifier.
+        <TEXT> </TEXT>: Contains document text.
+        </DOC>: Ending tag of a document.
+
     Return value:
-        dict: object in which the keys are the doc's name and the value is the doc's full content (str)
+        dict: object in which the keys are the doc's identifier and the value is the doc's full content (str)
     """
 
     contents = {}
@@ -23,7 +29,11 @@ def get_db_content() -> dict:
     # loops through all files
     for filename in files:
         with open(filename, 'r') as file: 
-            contents[filename.replace(DATABASE_DIRECTORY_PATH, '')] = file.read()
+            raw_content = file.read()
+            file_id = re.sub(r'.+?<DOCNO>(.+?)</DOCNO>.+?', '\1', raw_content, flags=re.DOTALL)
+            file_text = re.sub(r'.+?<TEXT>(.+?)</TEXT>.+?', '\1', raw_content, flags=re.DOTALL)
+
+            contents[file_id] = file_text
 
     return contents
 
@@ -38,7 +48,7 @@ def remove_special_characters(text: str) -> str:
         str: the same text but with no special characters.
     """
 
-    return sub(r'[^a-zA-Z0-9\s]', '', text)
+    return re.sub(r'[^a-zA-Z0-9\s]', '', text)
 
 def lemmatize(word: str, pos="") -> str:
     """
