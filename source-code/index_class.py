@@ -225,3 +225,30 @@ class Index:
         return_list = sorted(self.words_in_doc.items(), key=lambda e: e[0])
 
         return return_list if not dict else list(map(lambda e: { 'doc': e[0], 'words': e[1] }, return_list))
+
+    def get_all_words_in_docs(self, docs: list) -> list:
+        """
+        The getter for the vocabulary (all different words) in a list of docs.
+
+        Parameters:
+            docs (list): list of doc names.
+
+        Return value:
+            list: all different words contained by the docs targeted.
+        """
+
+        return set(extract_lists([ words for doc, words in self.words_in_doc.items() if doc in docs ]))
+
+    def get_frequency_in_doc(self, word: str, doc: str) -> int:
+        """
+        The getter for a word's frequency in a doc.
+
+        Parameters:
+            word (str): the target-word.
+            doc (str): the queried doc.
+
+        Return value:
+            int: the target-word's frequency in the queried doc.
+        """
+
+        return self.words_in_doc[doc].count(word)
