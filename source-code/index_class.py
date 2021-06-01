@@ -94,14 +94,20 @@ class Index:
 
         # if the word is not yet present in the index, adds it
         if word not in self.posting_list.keys(): self.posting_list[word] = []
+        
+        # the last doc in the list's numerical id
+        last_id = self.doc_id.values()[-1]
 
         # loops through the posting list
-        for e in posting_list:
+        for i, e in enumerate(posting_list):
             # if the current dict is invalid, ignore it
             if type(e['doc']) is not str or type(e['freq']) is not int: continue
 
             # computes the doc and word into self.words_in_doc
-            elif e['doc'] not in self.words_in_doc.keys(): self.posting_list[e['doc']] = [ word for _ in range(e['freq']) ]
+            elif e['doc'] not in self.words_in_doc.keys(): 
+                self.posting_list[e['doc']] = [ word for _ in range(e['freq']) ]
+                self.doc_id[e['doc']].append({ e['doc']: last_id + 1 + i })
+
             else: self.words_in_doc[e['doc']] = sorted(self.words_in_doc[e['doc']] + [word for _ in range(e['freq'])])
 
             # computes the doc and word into self.posting_list
