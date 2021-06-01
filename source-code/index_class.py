@@ -286,3 +286,13 @@ class Index:
         """
 
         return [ doc[0] for doc in self.doc_id.items() if doc[1] == id ][0] if int in self.doc_id.values() else None
+
+    def get_all_docs_ids(self) -> list:
+        """
+        The getter for all of the docs in the database (returning only their numerical ids).
+
+        Return value:
+            list: all numerical ids of documents in the Index.
+        """
+
+        return sorted(self.doc_id.values())
