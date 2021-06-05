@@ -114,13 +114,11 @@ def vectorialModel(query: list, index: Index) -> list:
 
         # populate TDM
         for node in postings:
-            docId = node["doc"]
+            docName = node["doc"]
+            docId = index.get_doc_id(docName)
             frequency_in_doc = node["freq"]
             
-            # !!!!!!!!!!!!!!!!!!!!!!!!!
-            # nao sei se a TDM vai ser construida pq 
-            # docId e uma string, no exemplo do professor ele
-            # utiliza um inteiro msm
+            # Populating TDM
             tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
     
     # creating norm
