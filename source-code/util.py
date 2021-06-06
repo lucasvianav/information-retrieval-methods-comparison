@@ -7,9 +7,9 @@ import re
 # download('punkt')
 # download('wordnet')
 
-DATABASE_DIRECTORY_PATH = './data/'
+DATABASE_DIRECTORY_PATH = './data/en.doc.2010/TELEGRAPH_UTF8/'
 
-def get_db_content() -> dict: 
+def get_db_content() -> dict:
     """
     Loops through all files in the database (data/) and reads their contents, returning it as a doc-content object.
 
@@ -24,20 +24,37 @@ def get_db_content() -> dict:
     """
 
     contents = {}
-    files = sorted(glob(DATABASE_DIRECTORY_PATH + '*')) # list of all files in the database
+
+    # DIRECTORY ORGANIZATION:
+    # The top-level directory contains four directories, each corresponding
+    # to the year of publication of the contained news articles. Each of these
+    # directories is further divided into sub-directories corresponding to the
+    # section/subject of the newspaper in which the various articles appeared (e.g.
+    # nation, sports, business, etc). Total of 125586 documents.
+
+    # list of all year directories in the database
+    # publication_years = sorted(glob(DATABASE_DIRECTORY_PATH + '*'))
+    publication_years = ['./data/en.doc.2010/TELEGRAPH_UTF8/2004_utf8']
 
     # loops through all files
-    for filename in files:
-        with open(filename, 'r') as file: 
-            raw_content = file.read()
-            file_id = re.sub(r'.+?<DOCNO>(.+?)</DOCNO>.+?', '\1', raw_content, flags=re.DOTALL)
-            file_text = re.sub(r'.+?<TEXT>(.+?)</TEXT>.+?', '\1', raw_content, flags=re.DOTALL)
+    for year in publication_years:
+        publication_subjects = sorted(glob(year + '/*'))
 
-            contents[file_id] = file_text
+        for subject in publication_subjects:
+            published_articles = sorted(glob(subject + '/*'))
+
+            for article in published_articles:
+                print(article)
+                with open(article, 'r') as file:
+                    raw_content = file.read()
+                    file_id = re.sub(r'.+?<DOCNO>(.+?)</DOCNO>.+', r'\g<1>', raw_content, flags=re.DOTALL)
+                    file_text = re.sub(r'.+?<TEXT>(.+?)</TEXT>.+', r'\g<1>', raw_content, flags=re.DOTALL)
+
+                    contents[file_id] = file_text
 
     return contents
 
-def remove_special_characters(text: str) -> str: 
+def remove_special_characters(text: str) -> str:
     """
     Uses regex to remove characters that are neither alpha-numeric nor whitespace from a text.
 
@@ -64,7 +81,7 @@ def lemmatize(word: str, pos="") -> str:
 
     return WordNetLemmatizer().lemmatize((word, pos) if pos else word)
 
-def get_intersection(list1, list2) -> list: 
+def get_intersection(list1, list2) -> list:
     """
     Uses the filter() method to get the intersection between two lists (lists of lists are supported).
 
@@ -77,7 +94,7 @@ def get_intersection(list1, list2) -> list:
 
     return list(filter(lambda e: e in list2, list1))
 
-def parse_text(text: str) -> list: 
+def parse_text(text: str) -> list:
     """
     Removes all special characters from and tokenizes a text, then normalizes and lemmatizes each token (word).
     Doesn't filter stopwords nor performs radicalization.
@@ -91,7 +108,7 @@ def parse_text(text: str) -> list:
 
     return [ lemmatize(word.lower()) for word in word_tokenize(remove_special_characters(text)) ]
 
-def extract_lists(list_of_lists: list): 
+def extract_lists(list_of_lists: list):
     """
     Uses the reduce() method to extract all inner elements of a list of lists into the outer list - turning the list of lists into a simple list. It also sorts the resulting list.
 
