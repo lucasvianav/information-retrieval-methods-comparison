@@ -2,6 +2,8 @@ from math import log10 as log
 from functools import reduce
 from util import get_intersection
 from index_class import Index
+
+import scipy.sparse as sp_sparse
 import numpy as np
 import math
 
@@ -81,8 +83,9 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> dict:
 
 def vectorialModel(query: list, index: Index) -> list:
     """
-    Applies the vectorial model for information retrieval to calculate the similarity between 
-    the query and the indexed documents (considering the passed docs as relevant).
+    Applies the vectorial model for information retrieval to calculate the 
+    similarity between the query and the indexed documents (considering the 
+    passed docs as relevant).
     
     Parameters:
         query (list): list of query's words/tokens.
@@ -98,8 +101,9 @@ def vectorialModel(query: list, index: Index) -> list:
     number_of_unique_words = len(unique_words)
     doc_mapping = index.get_all_docs_names()
 
-    # creating TDM (Term Document Matrix)
-    tdm = np.zeros((number_of_unique_words, number_of_documents_in_database))
+    # creating TDM base (Term Document Matrix)
+    tdm = sp_sparse.lil_matrix((number_of_unique_words, 
+                                    number_of_documents_in_database))
 
     for i in number_of_unique_words:
         word = unique_words[i]
@@ -121,8 +125,9 @@ def vectorialModel(query: list, index: Index) -> list:
             # Populating TDM
             tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
     
+
     # creating norm
-    norm = np.sum(tdm**2, axis=0)
+    norm = np.sum(tdm.multiply(tdm), axis=0)
     norm = [math.sqrt(norm[i]) for i in range(len(norm))]
 
     # creating query vector
@@ -139,7 +144,7 @@ def vectorialModel(query: list, index: Index) -> list:
     answer = []
     ranking = np.zeros(number_of_documents_in_database)
     for j in range(number_of_documents_in_database):
-        ranking[j] = np.dot(tdm[:,j], query_vector) / norm[j]
+        ranking[j] = tdm.dot(query_vector) / norm[j]
         answer.append((doc_mapping[j], ranking[j]))
 
     return sorted(answer, key = lambda x:x[1])
