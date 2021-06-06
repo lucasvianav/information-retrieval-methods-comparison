@@ -2,8 +2,8 @@ from functools import reduce
 from util import *
 
 class Index:
-    """ 
-    This is a class for information retrieval index storing. 
+    """
+    This is a class for information retrieval index storing.
 
     With this, it's possible to store a list of words associated with it's "posting list" - list of documents from the database in which each word is present as well as it's frequency in that document.
 
@@ -15,7 +15,7 @@ class Index:
         None, if not.
     """
 
-    def __init__(self, database_contents: dict): 
+    def __init__(self, database_contents: dict):
         """
         The constructor for the Index class.
 
@@ -58,21 +58,21 @@ class Index:
 
         # keys --> words (sorted)
         # values --> list of dicts containing the doc name and the word frequency in that doc (sorted by doc)
-        self.posting_list = { 
+        self.posting_list = {
             word: sorted(
                 list(
                     map(
                         lambda doc: { 'doc': doc[0], 'freq': doc[1].count(word) },
                         filter( lambda doc: word in doc[1], words_in_doc.items() )
                     )
-                ), 
+                ),
 
                 key=lambda e: e['doc']
             )
 
-            for word in self.all_words 
+            for word in self.all_words
         }
-        
+
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
         self.words_in_doc = words_in_doc
@@ -94,7 +94,7 @@ class Index:
 
         # if the word is not yet present in the index, adds it
         if word not in self.posting_list.keys(): self.posting_list[word] = []
-        
+
         # the last doc in the list's numerical id
         last_id = self.doc_id.values()[-1]
 
@@ -104,7 +104,7 @@ class Index:
             if type(e['doc']) is not str or type(e['freq']) is not int: continue
 
             # computes the doc and word into self.words_in_doc
-            elif e['doc'] not in self.words_in_doc.keys(): 
+            elif e['doc'] not in self.words_in_doc.keys():
                 self.posting_list[e['doc']] = [ word for _ in range(e['freq']) ]
                 self.doc_id[e['doc']].append({ e['doc']: last_id + 1 + i })
 
@@ -116,7 +116,7 @@ class Index:
             else: doc_freq['freq'] += e['freq']
             finally: self.posting_list[word].sort(key=lambda e: e['doc'])
 
-    def get_posting_list(self, word: str) -> list: 
+    def get_posting_list(self, word: str) -> list:
         """
         The getter for the posting list of a word.
 
@@ -126,14 +126,14 @@ class Index:
         Return value:
             list: the posting list contains dicts with the 'doc'
                   as key and the doc name as value (str), as well
-                  as 'freq' as key and that word's frequency in the 
-                  doc as value (int) - lists all docs that contain 
+                  as 'freq' as key and that word's frequency in the
+                  doc as value (int) - lists all docs that contain
                   the target-word.
         """
 
         return self.posting_list[word] if word in self.posting_list.keys() else []
 
-    def get_doc_list(self, word: str) -> list: 
+    def get_doc_list(self, word: str) -> list:
         """
         The getter for the list of docs that contains a word.
 
@@ -146,7 +146,7 @@ class Index:
 
         return map(lambda e: e['doc'], self.posting_list[word]) if word in self.posting_list.keys() else []
 
-    def get_words_in_doc(self, doc: str) -> list: 
+    def get_words_in_doc(self, doc: str) -> list:
         """
         The getter for the posting list of a word.
 
@@ -159,7 +159,7 @@ class Index:
 
         return self.words_in_doc[doc] if doc in self.words_in_doc.keys() else []
 
-    def get_n_docs(self) -> int: 
+    def get_n_docs(self) -> int:
         """
         The getter for the number of docs in the database.
 
@@ -169,7 +169,7 @@ class Index:
 
         return len(self.words_in_doc.keys())
 
-    def get_n_docs_containing(self, word: str) -> int: 
+    def get_n_docs_containing(self, word: str) -> int:
         """
         The getter for the number of docs that contain a word.
 
@@ -192,11 +192,11 @@ class Index:
         Return value:
             int: number of words contained by the target-doc.
         """
-        
+
 
         return len(set(self.words_in_doc[doc])) if doc in self.words_in_doc.keys() else 0
 
-    def get_total_freq(self, word: str) -> int: 
+    def get_total_freq(self, word: str) -> int:
         """
         The getter for total frequency of a word (number of times it appears through all docs).
 
@@ -208,8 +208,8 @@ class Index:
         """
 
         return reduce(lambda acc, cur: acc + cur['freq'], self.posting_list[word], 0) if word in self.posting_list.keys() else 0
-   
-    def print_posting_list(self, word: str) -> None: 
+
+    def print_posting_list(self, word: str) -> None:
         """
         Prints a word's posting list into stdout.
 
@@ -221,7 +221,7 @@ class Index:
 
         print('\n'.join(map(lambda e: f'doc: {e["doc"]}, freq: {e["freq"]}', self.posting_list[word])))
 
-    def print_words_in_doc(self, doc: str) -> None: 
+    def print_words_in_doc(self, doc: str) -> None:
         """
         Prints a doc's list of words.
 
@@ -233,7 +233,7 @@ class Index:
 
         print('\n'.join(self.words_in_doc[doc]))
 
-    def get_all_docs(self, dict=False) -> list: 
+    def get_all_docs(self, dict=False) -> list:
         """
         The getter for all of the docs in the database (returning both the doc's name and words).
 
@@ -243,7 +243,7 @@ class Index:
         Return value:
             list: contains the docs's info - list of {'doc': DOC_NAME, 'words': DOC_WORDS} if dict is True, (DOC_NAME, DOC_WORDS) otherwise
         """
-        
+
         return_list = sorted(self.words_in_doc.items(), key=lambda e: e[0])
 
         return return_list if not dict else list(map(lambda e: { 'doc': e[0], 'words': e[1] }, return_list))
@@ -279,7 +279,7 @@ class Index:
         """
 
         return self.doc_id[name] if name in self.doc_id.keys() else None
-        
+
     def get_doc_name(self, id: int) -> str:
         """
         The getter for a doc's name.
@@ -302,3 +302,30 @@ class Index:
         """
 
         return sorted(self.doc_id.values())
+
+    def get_all_words_in_docs(self, docs: list) -> list:
+        """
+        The getter for the vocabulary (all different words) in a list of docs.
+
+        Parameters:
+            docs (list): list of doc names.
+
+        Return value:
+            list: all different words contained by the docs targeted.
+        """
+
+        return list(set(extract_lists([ words for doc, words in self.words_in_doc.items() if doc in docs ])))
+
+    def get_frequency_in_doc(self, word: str, doc: str) -> int:
+        """
+        The getter for a word's frequency in a doc.
+
+        Parameters:
+            word (str): the target-word.
+            doc (str): the queried doc.
+
+        Return value:
+            int: the target-word's frequency in the queried doc.
+        """
+
+        return self.words_in_doc[doc].count(word)
