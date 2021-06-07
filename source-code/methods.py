@@ -78,7 +78,6 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> dict:
     # calculates the similarities between the query an each of the indexed docs
     return { doc: similarity(words) for doc, words in index.get_all_docs() }
 
-
 def vectorialModel(query: list, index: Index) -> list:
     """
     Applies the vectorial model for information retrieval to calculate the
@@ -101,7 +100,8 @@ def vectorialModel(query: list, index: Index) -> list:
 
     # creating TDM base (Term Document Matrix)
     tdm = sp_sparse.lil_matrix((number_of_unique_words,
-                                    number_of_documents_in_database))
+                                number_of_documents_in_database))
+
 
     for i in range(number_of_unique_words):
         word = unique_words[i]
@@ -125,7 +125,7 @@ def vectorialModel(query: list, index: Index) -> list:
 
 
     # creating norm
-    norm = np.sum(tdm.multiply(tdm), axis=0)
+    norm = tdm.power(2).sum(axis=0).A[0]
     norm = [math.sqrt(norm[i]) for i in range(len(norm))]
 
     # creating query vector
@@ -142,7 +142,8 @@ def vectorialModel(query: list, index: Index) -> list:
     answer = []
     ranking = np.zeros(number_of_documents_in_database)
     for j in range(number_of_documents_in_database):
-        ranking[j] = tdm.dot(query_vector) / norm[j]
+        ranking[j] = np.dot(query_vector) / norm[j]
         answer.append((doc_mapping[j], ranking[j]))
 
     return sorted(answer, key = lambda x:x[1])
+
