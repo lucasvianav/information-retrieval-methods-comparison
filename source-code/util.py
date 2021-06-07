@@ -1,13 +1,17 @@
 from glob import glob
 from nltk.stem import WordNetLemmatizer
 from nltk import download, word_tokenize
+from nltk.stem import WordNetLemmatizer, SnowballStemmer
+from nltk.corpus import stopwords as stpw
 from functools import reduce
 import re
 
 # download('punkt')
 # download('wordnet')
+# download('stopwords')
 
 DATABASE_DIRECTORY_PATH = './data/en.doc.2010/TELEGRAPH_UTF8/'
+STOP_WORDS = set(stpw.words('english')
 
 def get_db_content() -> dict:
     """
@@ -81,9 +85,23 @@ def lemmatize(word: str, pos="") -> str:
 
     return WordNetLemmatizer().lemmatize((word, pos) if pos else word)
 
+def stem(word: str, language='english') -> str:
+    """
+    Shortcut to nltk.stem.SnowballStemmer(language).stem().
+
+    Parameters:
+        word (str): the word to be lemmatized.
+        pos (str): the word-type the result should be turned into (default is noun).
+
+   Return value:
+       str: the lemmatized word.
+   """
+
+    return SnowballStemmer(language).stem(word)
+
 def get_intersection(list1, list2) -> list:
     """
-    Uses the filter() method to get the intersection between two lists (lists of lists are supported).
+    Uses the list comprehension to get the intersection between two lists (lists of lists are supported).
 
     Parameters:
         list1, list2: lists to intersect.
@@ -92,21 +110,25 @@ def get_intersection(list1, list2) -> list:
         list: intersection between list1 and list2.
     """
 
-    return list(filter(lambda e: e in list2, list1))
+    return [ e for e in list1 if e in list2 ]
 
-def parse_text(text: str) -> list:
+def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list:
     """
     Removes all special characters from and tokenizes a text, then normalizes and lemmatizes each token (word).
-    Doesn't filter stopwords nor performs radicalization.
 
     Parameters:
         text (str): the text to be parsed.
+        filter_stopwords (bool): if true, all of the text stopwords will be ignored.
+        stem_words (bool): if true, all of the words will be lemmatized and stemmed.
 
     Return value:
         list: parsed tokens/words.
     """
 
-    return [ lemmatize(word.lower()) for word in word_tokenize(remove_special_characters(text)) ]
+    return [
+        stem(lemmatize(word)) if stem_words else word for word in word_tokenize(remove_special_characters(text).lower())
+        if word not in ( STOP_WORDS if filter_stopwords else [] ) # ignores stopwords if the filter is activated
+    ]
 
 def extract_lists(list_of_lists: list):
     """
