@@ -1,7 +1,7 @@
 from nltk import download, word_tokenize
 from index_class import Index
 from util import *
-from methods import probabilisticModel
+from methods import probabilisticModel, vectorialModel
 from functools import reduce
 
 # FILTER_STOPWORDS = False
@@ -16,3 +16,4 @@ index = Index(database_contents, FILTER_STOPWORDS, STEM_WORDS)
 query = parse_text('Clashes between the Gurjars and Meenas', FILTER_STOPWORDS, STEM_WORDS)
 
 print(probabilisticModel(query, index))
+print(vectorialModel(query, index))

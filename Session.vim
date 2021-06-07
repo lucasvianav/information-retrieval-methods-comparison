@@ -7,12 +7,14 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
 set shortmess=aoO
-badd +7 source-code/util.py
-badd +5 ~/USP/disciplinas/2021/SCC0282_RI/trabalho01/source-code/methods.py
+badd +122 source-code/index_class.py
+badd +19 source-code/main.py
+badd +43 source-code/util.py
+badd +6 data/en.topics.76-125.2010.txt
 argglobal
 %argdel
-$argadd .
-edit ~/USP/disciplinas/2021/SCC0282_RI/trabalho01/source-code/methods.py
+$argadd ./
+edit data/en.topics.76-125.2010.txt
 set splitbelow splitright
 wincmd t
 set winminheight=0
@@ -28,11 +30,11 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 5 - ((4 * winheight(0) + 25) / 50)
+let s:l = 6 - ((5 * winheight(0) + 25) / 51)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-5
+6
 normal! 01|
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'

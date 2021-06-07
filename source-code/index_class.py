@@ -43,8 +43,7 @@ class Index:
         # values --> doc numerical id
         doc_id = {}
 
-        # list containing every word processed (sorted and no repetition)
-        self.all_words = set()
+        all_words = set()
 
         # keys --> words (sorted)
         # values --> list of dicts containing the doc name and the word frequency in that doc (sorted by doc)
@@ -59,12 +58,12 @@ class Index:
             if type(content) is not str: return None
 
             # parses the content text and stores it
-            words = parse_text(content)
+            words = parse_text(content, filter_stopwords, stem_words)
             words_in_doc[doc] = words
 
             for word in set(words):
                 # adds current word to the set
-                self.all_words.add(word)
+                all_words.add(word)
 
                 # if the word is not yet present in the index, adds it
                 if word not in self.posting_list.keys(): self.posting_list[word] = []
@@ -82,6 +81,9 @@ class Index:
         # keys --> doc name
         # values --> doc numerical id
         self.doc_id = doc_id
+
+        # list containing every word processed (sorted and no repetition)
+        self.all_words = sorted(list(all_words))
 
         self.filter_stopwords = filter_stopwords
         self.stem_words = stem_words
@@ -104,7 +106,7 @@ class Index:
         elif word not in self.posting_list.keys(): self.posting_list[word] = []
 
         # the last doc in the list's numerical id
-        last_id = self.doc_id.values()[-1]
+        last_id = list(self.doc_id.values())[-1]
 
         # loops through the posting list
         for i, e in enumerate(posting_list):
@@ -152,7 +154,7 @@ class Index:
             list: docs that contain the target-word.
         """
 
-        return map(lambda e: e['doc'], self.posting_list[word]) if word in self.posting_list.keys() else []
+        return [ e['doc'] for e in self.posting_list[word] ] if word in self.posting_list.keys() else []
 
     def get_words_in_doc(self, doc: str) -> list:
         """
@@ -190,7 +192,7 @@ class Index:
 
         return len(self.posting_list[word]) if word in self.posting_list.keys() else 0
 
-    def get_n_different_words(self, doc: str) -> str:
+    def get_n_different_words(self, doc: str) -> int:
         """
         The getter for the number of different words contained by a doc.
 
@@ -283,10 +285,10 @@ class Index:
             name (str): the target-document's name.
 
         Return value:
-            int: the document's numerical id (None if the doc is not found).
+            int: the document's numerical id (-1 if the doc is not found).
         """
 
-        return self.doc_id[name] if name in self.doc_id.keys() else None
+        return self.doc_id[name] if name in self.doc_id.keys() else -1
 
     def get_doc_name(self, id: int) -> str:
         """
@@ -296,10 +298,10 @@ class Index:
             id (int): the document's numerical id.
 
         Return value:
-            str: the target-document's name (None if the doc is not found).
+            str: the target-document's name
         """
 
-        return [ doc[0] for doc in self.doc_id.items() if doc[1] == id ][0] if int in self.doc_id.values() else None
+        return [ doc[0] for doc in self.doc_id.items() if doc[1] == id ][0] if int in self.doc_id.values() else ''
 
     def get_all_docs_ids(self) -> list:
         """

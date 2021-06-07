@@ -1,5 +1,4 @@
 from glob import glob
-from nltk.stem import WordNetLemmatizer
 from nltk import download, word_tokenize
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.corpus import stopwords as stpw
@@ -37,18 +36,17 @@ def get_db_content() -> dict:
     # nation, sports, business, etc). Total of 125586 documents.
 
     # list of all year directories in the database
-    # publication_years = sorted(glob(DATABASE_DIRECTORY_PATH + '*'))
+    # publication_years = glob(DATABASE_DIRECTORY_PATH + '*')
     publication_years = ['./data/en.doc.2010/TELEGRAPH_UTF8/2004_utf8']
 
     # loops through all files
     for year in publication_years:
-        publication_subjects = sorted(glob(year + '/*'))
+        publication_subjects = glob(year + '/*')
 
         for subject in publication_subjects:
-            published_articles = sorted(glob(subject + '/*'))
+            published_articles = glob(subject + '/*')
 
             for article in published_articles:
-                print(article)
                 with open(article, 'r') as file:
                     raw_content = file.read()
                     file_id = re.sub(r'.+?<DOCNO>(.+?)</DOCNO>.+', r'\g<1>', raw_content, flags=re.DOTALL)
