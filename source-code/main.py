@@ -1,11 +1,6 @@
-from nltk import download, word_tokenize
 from index_class import Index
 from util import *
 from methods import probabilisticModel, vectorialModel
-from functools import reduce
-
-# FILTER_STOPWORDS = False
-# STEM_WORDS = False
 
 FILTER_STOPWORDS = True
 STEM_WORDS = True

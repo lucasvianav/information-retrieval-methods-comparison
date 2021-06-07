@@ -1,4 +1,3 @@
-from math import log10 as log
 from functools import reduce
 from util import get_intersection
 from index_class import Index
@@ -66,7 +65,7 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> dict:
             n_containing_word_num = n_containing_word[cur] if n_containing_word[cur] <= n_docs/2 else 0
 
             # applies the probabilistic model equation
-            return acc + log(
+            return acc + math.log10(
                 ((n_relevant_containing_word[cur] + 0.5) * (n_docs - n_containing_word_num - n_relevant + n_relevant_containing_word[cur] + 0.5))
                 /
                 ((n_relevant - n_relevant_containing_word[cur] + 0.5) * (n_containing_word[cur] - n_relevant_containing_word[cur] + 0.5))

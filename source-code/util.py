@@ -81,7 +81,7 @@ def lemmatize(word: str, pos="") -> str:
         str: the lemmatized word.
     """
 
-    return WordNetLemmatizer().lemmatize((word, pos) if pos else word)
+    return str(WordNetLemmatizer().lemmatize((word, pos) if pos else word))
 
 def stem(word: str, language='english') -> str:
     """
@@ -91,9 +91,9 @@ def stem(word: str, language='english') -> str:
         word (str): the word to be lemmatized.
         pos (str): the word-type the result should be turned into (default is noun).
 
-   Return value:
-       str: the lemmatized word.
-   """
+    Return value:
+        str: the lemmatized word.
+    """
 
     return SnowballStemmer(language).stem(word)
 

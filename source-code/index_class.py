@@ -109,21 +109,24 @@ class Index:
         last_id = list(self.doc_id.values())[-1]
 
         # loops through the posting list
-        for i, e in enumerate(posting_list):
+        for i, element in enumerate(posting_list):
+            doc = element['doc']
+            freq = element['freq']
+
             # if the current dict is invalid, ignore it
-            if type(e['doc']) is not str or type(e['freq']) is not int: continue
+            if type(doc) is not str or type(freq) is not int: continue
 
             # computes the doc and word into self.words_in_doc
-            elif e['doc'] not in self.words_in_doc.keys():
-                self.posting_list[e['doc']] = [ word for _ in range(e['freq']) ]
-                self.doc_id[e['doc']].append({ e['doc']: last_id + 1 + i })
+            elif doc not in self.words_in_doc.keys():
+                self.posting_list[doc] = [ word for _ in range(freq) ]
+                self.doc_id[doc].append({ doc: last_id + 1 + i })
 
-            else: self.words_in_doc[e['doc']] = sorted(self.words_in_doc[e['doc']] + [word for _ in range(e['freq'])])
+            else: self.words_in_doc[doc] = sorted(self.words_in_doc[doc] + [word for _ in range(freq)])
 
             # computes the doc and word into self.posting_list
-            try: doc_freq = next(filter(lambda d: e['doc'] == d['doc'], self.posting_list[word]))
-            except StopIteration: self.posting_list[word].append(e.copy())
-            else: doc_freq['freq'] += e['freq']
+            try: doc_freq = [ node for node in self.posting_list[word] if node['doc'] == doc ][0]
+            except IndexError: self.posting_list[word].append(element.copy())
+            else: doc_freq['freq'] += freq
             finally: self.posting_list[word].sort(key=lambda e: e['doc'])
 
     def get_posting_list(self, word: str) -> list:
