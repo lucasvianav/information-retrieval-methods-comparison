@@ -16,7 +16,7 @@ class Index:
         Index, if the passed parameters are valid.
         None, if not.
     """
-    
+
     def __init__(self, database_contents: dict, filter_stopwords: bool, stem_words: bool):
         """
         The constructor for the Index class.
@@ -31,6 +31,10 @@ class Index:
             None, if not.
         """
 
+        # sorts $database_contents by name of doc and
+        # creates list of tuples (docname, docwords)
+        database = sorted(database_contents.items(), key=lambda e: e[0])
+
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
         words_in_doc = {}
@@ -39,8 +43,15 @@ class Index:
         # values --> doc numerical id
         doc_id = {}
 
+        # list containing every word processed (sorted and no repetition)
+        self.all_words = set()
+
+        # keys --> words (sorted)
+        # values --> list of dicts containing the doc name and the word frequency in that doc (sorted by doc)
+        self.posting_list = {}
+
         # loops through each doc and it's contents
-        for i, items in enumerate(database_contents.items()):
+        for i, items in enumerate(database):
             # unpacks items
             doc, content = items
 
@@ -51,24 +62,18 @@ class Index:
             words = parse_text(content)
             words_in_doc[doc] = words
 
+            for word in set(words):
+                # adds current word to the set
+                self.all_words.add(word)
+
+                # if the word is not yet present in the index, adds it
+                if word not in self.posting_list.keys(): self.posting_list[word] = []
+
+                # appends the current doc to this word's posting list
+                self.posting_list[word].append({'doc': doc, 'freq': words.count(word)})
+
             # sets doc_id
             doc_id[doc] = i
-
-        # # sorts by doc
-        # words_in_doc = dict(sorted(words_in_doc.items(), key=lambda e: e[0]))
-
-        # list containing every word processed (sorted and no repetition)
-        self.all_words = set(extract_lists(words_in_doc.values()))
-
-        # keys --> words (sorted)
-        # values --> list of dicts containing the doc name and the word frequency in that doc (sorted by doc)
-        self.posting_list = {
-            word: [
-                { 'doc': name, 'freq': words.count(word) }
-                for name, words in sorted(words_in_doc.items(), key=lambda e: e[0])
-                if word in words
-            ] for word in all_words
-        }
 
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
@@ -77,7 +82,7 @@ class Index:
         # keys --> doc name
         # values --> doc numerical id
         self.doc_id = doc_id
-        
+
         self.filter_stopwords = filter_stopwords
         self.stem_words = stem_words
 
@@ -305,7 +310,7 @@ class Index:
         """
 
         return sorted(self.doc_id.values())
-      
+
     def get_all_words_in_docs(self, docs: list) -> list:
         """
         The getter for the vocabulary (all different words) in a list of docs.
