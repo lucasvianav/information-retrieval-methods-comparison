@@ -37,12 +37,13 @@ class Index:
 
         # keys --> doc name
         # values --> list of all words in that doc (with repetitions)
-        words_in_doc = {}
+        self.words_in_doc = {}
 
         # keys --> doc name
         # values --> doc numerical id
-        doc_id = {}
+        self.doc_id = {}
 
+        # set containing the whole vocabulary
         all_words = set()
 
         # keys --> words (sorted)
@@ -59,7 +60,7 @@ class Index:
 
             # parses the content text and stores it
             words = parse_text(content, filter_stopwords, stem_words)
-            words_in_doc[doc] = words
+            self.words_in_doc[doc] = words
 
             for word in set(words):
                 # adds current word to the set
@@ -72,15 +73,7 @@ class Index:
                 self.posting_list[word].append({'doc': doc, 'freq': words.count(word)})
 
             # sets doc_id
-            doc_id[doc] = i
-
-        # keys --> doc name
-        # values --> list of all words in that doc (with repetitions)
-        self.words_in_doc = words_in_doc
-
-        # keys --> doc name
-        # values --> doc numerical id
-        self.doc_id = doc_id
+            self.doc_id[doc] = i
 
         # list containing every word processed (sorted and no repetition)
         self.all_words = sorted(list(all_words))
@@ -161,7 +154,7 @@ class Index:
 
     def get_words_in_doc(self, doc: str) -> list:
         """
-        The getter for the posting list of a word.
+        The getter for the list of words contained by a doc.
 
         Parameters:
             doc (str): the target-doc.
@@ -273,7 +266,7 @@ class Index:
 
     def get_all_words(self) -> list:
         """
-        getter of all_words list of index class
+        The getter for the Index's vocabulary (all words with no repetitions).
 
         Return value:
             list: containing every word processed (sorted and no repetition)
