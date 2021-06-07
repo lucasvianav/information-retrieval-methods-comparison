@@ -10,9 +10,9 @@ from functools import reduce
 # download('stopwords')
 
 DATABASE_DIRECTORY_PATH = './data/'
-STOP_WORDS = set(stpw.words('english') + stpw.words('portuguese'))
+STOP_WORDS = set(stpw.words('english')
 
-def get_db_content() -> dict: 
+def get_db_content() -> dict:
     """
     Loops through all files in the database (data/) and reads their contents, returning it as a doc-content object.
 
@@ -29,7 +29,7 @@ def get_db_content() -> dict:
 
     return contents
 
-def remove_special_characters(text: str) -> str: 
+def remove_special_characters(text: str) -> str:
     """
     Uses regex to remove characters that are neither alpha-numeric nor whitespace from a text.
 
@@ -70,7 +70,7 @@ def stem(word: str, language='english') -> str:
 
     return SnowballStemmer(language).stem(word)
 
-def get_intersection(list1, list2) -> list: 
+def get_intersection(list1, list2) -> list:
     """
     Uses the list comprehension to get the intersection between two lists (lists of lists are supported).
 
@@ -83,7 +83,7 @@ def get_intersection(list1, list2) -> list:
 
     return [ e for e in list1 if e in list2 ]
 
-def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list: 
+def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list:
     """
     Removes all special characters from and tokenizes a text, then normalizes and lemmatizes each token (word).
 
@@ -96,12 +96,12 @@ def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list:
         list: parsed tokens/words.
     """
 
-    return [ 
-        stem(lemmatize(word)) if stem_words else word for word in word_tokenize(remove_special_characters(text).lower()) 
+    return [
+        stem(lemmatize(word)) if stem_words else word for word in word_tokenize(remove_special_characters(text).lower())
         if word not in ( STOP_WORDS if filter_stopwords else [] ) # ignores stopwords if the filter is activated
     ]
 
-def extract_lists(list_of_lists: list): 
+def extract_lists(list_of_lists: list):
     """
     Uses the reduce() method to extract all inner elements of a list of lists into the outer list - turning the list of lists into a simple list. It also sorts the resulting list.
 

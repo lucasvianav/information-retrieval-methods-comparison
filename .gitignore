@@ -2,6 +2,7 @@
 data-manzato/
 data/
 data/*
+Session.vim
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
