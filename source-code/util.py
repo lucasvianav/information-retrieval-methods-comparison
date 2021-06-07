@@ -11,7 +11,7 @@ import re
 # download('stopwords')
 
 DATABASE_DIRECTORY_PATH = './data/en.doc.2010/TELEGRAPH_UTF8/'
-STOP_WORDS = set(stpw.words('english')
+STOP_WORDS = stpw.words('english')
 
 def get_db_content() -> dict:
     """

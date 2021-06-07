@@ -13,7 +13,6 @@ STEM_WORDS = True
 database_contents = get_db_content()
 index = Index(database_contents, FILTER_STOPWORDS, STEM_WORDS)
 
-query = parse_text('to do', FILTER_STOPWORDS, STEM_WORDS)
+query = parse_text('Clashes between the Gurjars and Meenas', FILTER_STOPWORDS, STEM_WORDS)
 
 print(probabilisticModel(query, index))
-print(probabilisticModel(query, index, ['doc1.txt', 'doc3.txt']))
