@@ -104,7 +104,7 @@ def vectorialModel(query: list, index: Index) -> list:
     tdm = sp_sparse.lil_matrix((number_of_unique_words,
                                     number_of_documents_in_database))
 
-    for i in number_of_unique_words:
+    for i in range(number_of_unique_words):
         word = unique_words[i]
         # list of document and frequency in document
         # of word word
