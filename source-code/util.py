@@ -1,31 +1,60 @@
 from glob import glob
-from re import sub
+from nltk.stem import WordNetLemmatizer
 from nltk import download, word_tokenize
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
 from nltk.corpus import stopwords as stpw
 from functools import reduce
+import re
 
 # download('punkt')
 # download('wordnet')
 # download('stopwords')
 
-DATABASE_DIRECTORY_PATH = './data/'
+DATABASE_DIRECTORY_PATH = './data/en.doc.2010/TELEGRAPH_UTF8/'
 STOP_WORDS = set(stpw.words('english')
 
 def get_db_content() -> dict:
     """
     Loops through all files in the database (data/) and reads their contents, returning it as a doc-content object.
 
+    This method will parse documents marked up using the following tags:
+        <DOC>: Starting tag of a document.
+        <DOCNO> </DOCNO>: Contains document identifier.
+        <TEXT> </TEXT>: Contains document text.
+        </DOC>: Ending tag of a document.
+
     Return value:
-        dict: object in which the keys are the doc's name and the value is the doc's full content (str)
+        dict: object in which the keys are the doc's identifier and the value is the doc's full content (str)
     """
 
     contents = {}
-    files = sorted(glob(DATABASE_DIRECTORY_PATH + '*')) # list of all files in the database
+
+    # DIRECTORY ORGANIZATION:
+    # The top-level directory contains four directories, each corresponding
+    # to the year of publication of the contained news articles. Each of these
+    # directories is further divided into sub-directories corresponding to the
+    # section/subject of the newspaper in which the various articles appeared (e.g.
+    # nation, sports, business, etc). Total of 125586 documents.
+
+    # list of all year directories in the database
+    # publication_years = sorted(glob(DATABASE_DIRECTORY_PATH + '*'))
+    publication_years = ['./data/en.doc.2010/TELEGRAPH_UTF8/2004_utf8']
 
     # loops through all files
-    for filename in files:
-        with open(filename, 'r') as file: contents[filename.replace(DATABASE_DIRECTORY_PATH, '')] = file.read()
+    for year in publication_years:
+        publication_subjects = sorted(glob(year + '/*'))
+
+        for subject in publication_subjects:
+            published_articles = sorted(glob(subject + '/*'))
+
+            for article in published_articles:
+                print(article)
+                with open(article, 'r') as file:
+                    raw_content = file.read()
+                    file_id = re.sub(r'.+?<DOCNO>(.+?)</DOCNO>.+', r'\g<1>', raw_content, flags=re.DOTALL)
+                    file_text = re.sub(r'.+?<TEXT>(.+?)</TEXT>.+', r'\g<1>', raw_content, flags=re.DOTALL)
+
+                    contents[file_id] = file_text
 
     return contents
 
@@ -40,7 +69,7 @@ def remove_special_characters(text: str) -> str:
         str: the same text but with no special characters.
     """
 
-    return sub(r'[^a-zA-Z0-9\s]', '', text)
+    return re.sub(r'[^a-zA-Z0-9\s]', '', text)
 
 def lemmatize(word: str, pos="") -> str:
     """

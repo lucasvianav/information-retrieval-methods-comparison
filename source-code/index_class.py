@@ -16,7 +16,7 @@ class Index:
         Index, if the passed parameters are valid.
         None, if not.
     """
-
+    
     def __init__(self, database_contents: dict, filter_stopwords: bool, stem_words: bool):
         """
         The constructor for the Index class.
@@ -35,20 +35,30 @@ class Index:
         # values --> list of all words in that doc (with repetitions)
         words_in_doc = {}
 
-        # loops through each file and it's contents
-        for file, content in database_contents.items():
-            # if the passed file is invalid, return None
+        # keys --> doc name
+        # values --> doc numerical id
+        doc_id = {}
+
+        # loops through each doc and it's contents
+        for i, items in enumerate(database_contents.items()):
+            # unpacks items
+            doc, content = items
+
+            # if the passed doc is invalid, return None
             if type(content) is not str: return None
 
             # parses the content text and stores it
-            words = parse_text(content, filter_stopwords, stem_words)
-            words_in_doc[file] = words
+            words = parse_text(content)
+            words_in_doc[doc] = words
+
+            # sets doc_id
+            doc_id[doc] = i
 
         # # sorts by doc
         # words_in_doc = dict(sorted(words_in_doc.items(), key=lambda e: e[0]))
 
         # list containing every word processed (sorted and no repetition)
-        all_words = set(extract_lists(words_in_doc.values()))
+        self.all_words = set(extract_lists(words_in_doc.values()))
 
         # keys --> words (sorted)
         # values --> list of dicts containing the doc name and the word frequency in that doc (sorted by doc)
@@ -64,6 +74,10 @@ class Index:
         # values --> list of all words in that doc (with repetitions)
         self.words_in_doc = words_in_doc
 
+        # keys --> doc name
+        # values --> doc numerical id
+        self.doc_id = doc_id
+        
         self.filter_stopwords = filter_stopwords
         self.stem_words = stem_words
 
@@ -84,13 +98,19 @@ class Index:
         # if the word is not yet present in the index, adds it
         elif word not in self.posting_list.keys(): self.posting_list[word] = []
 
+        # the last doc in the list's numerical id
+        last_id = self.doc_id.values()[-1]
+
         # loops through the posting list
-        for e in posting_list:
+        for i, e in enumerate(posting_list):
             # if the current dict is invalid, ignore it
             if type(e['doc']) is not str or type(e['freq']) is not int: continue
 
             # computes the doc and word into self.words_in_doc
-            elif e['doc'] not in self.words_in_doc.keys(): self.posting_list[e['doc']] = [ word for _ in range(e['freq']) ]
+            elif e['doc'] not in self.words_in_doc.keys():
+                self.posting_list[e['doc']] = [ word for _ in range(e['freq']) ]
+                self.doc_id[e['doc']].append({ e['doc']: last_id + 1 + i })
+
             else: self.words_in_doc[e['doc']] = sorted(self.words_in_doc[e['doc']] + [word for _ in range(e['freq'])])
 
             # computes the doc and word into self.posting_list
@@ -107,7 +127,11 @@ class Index:
             word (str): the target-word.
 
         Return value:
-            list: the posting list contains dicts with the 'doc' as key and the doc name as value (str), as well as 'freq' as key and that word's frequency in the doc as value (int) - lists all docs that contain the target-word.
+            list: the posting list contains dicts with the 'doc'
+                  as key and the doc name as value (str), as well
+                  as 'freq' as key and that word's frequency in the
+                  doc as value (int) - lists all docs that contain
+                  the target-word.
         """
 
         return self.posting_list[word] if word in self.posting_list.keys() else []
@@ -172,6 +196,7 @@ class Index:
             int: number of words contained by the target-doc.
         """
 
+
         return len(set(self.words_in_doc[doc])) if doc in self.words_in_doc.keys() else 0
 
     def get_total_freq(self, word: str) -> int:
@@ -213,7 +238,7 @@ class Index:
 
     def get_all_docs(self, dict=False) -> list:
         """
-        The getter for all of the docs in the databse (returning both the doc's name and words),
+        The getter for all of the docs in the database (returning both the doc's name and words).
 
         Parameters:
             dict (bool): if true, the returned value will be a list of {'doc': DOC_NAME, 'words': DOC_WORDS}, if false it'll be a list of (DOC_NAME, DOC_WORDS).
@@ -226,6 +251,61 @@ class Index:
 
         return return_list if not dict else list(map(lambda e: { 'doc': e[0], 'words': e[1] }, return_list))
 
+    def get_all_docs_names(self) -> list:
+        """
+        The getter for all of the docs in the database (returning only their names).
+
+        Return value:
+            list: all names of documents in the Index.
+        """
+
+        return sorted(self.words_in_doc.keys())
+
+    def get_all_words(self) -> list:
+        """
+        getter of all_words list of index class
+
+        Return value:
+            list: containing every word processed (sorted and no repetition)
+        """
+        return self.all_words
+
+    def get_doc_id(self, name: str) -> int:
+        """
+        The getter for a doc's numerical id.
+
+        Parameters:
+            name (str): the target-document's name.
+
+        Return value:
+            int: the document's numerical id (None if the doc is not found).
+        """
+
+        return self.doc_id[name] if name in self.doc_id.keys() else None
+
+    def get_doc_name(self, id: int) -> str:
+        """
+        The getter for a doc's name.
+
+        Parameters:
+            id (int): the document's numerical id.
+
+        Return value:
+            str: the target-document's name (None if the doc is not found).
+        """
+
+        return [ doc[0] for doc in self.doc_id.items() if doc[1] == id ][0] if int in self.doc_id.values() else None
+
+    def get_all_docs_ids(self) -> list:
+        """
+        The getter for all of the docs in the database (returning only their numerical ids).
+
+        Return value:
+            list: all numerical ids of documents in the Index.
+        """
+
+        return sorted(self.doc_id.values())
+      
     def get_all_words_in_docs(self, docs: list) -> list:
         """
         The getter for the vocabulary (all different words) in a list of docs.
