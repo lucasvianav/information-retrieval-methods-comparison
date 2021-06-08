@@ -95,7 +95,6 @@ def vectorialModel(query: list, index: Index) -> list:
               being the rank value of document with given query.
     """
 
-    documents_in_database = index.get_all_docs_ids()
     number_of_documents_in_database = index.get_n_docs()
     unique_words = index.get_all_words()
     number_of_unique_words = len(unique_words)
