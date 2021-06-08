@@ -1,9 +1,11 @@
-from functools import reduce
-from util import get_intersection
-from index_class import Index
-import scipy.sparse as sp_sparse
-import numpy as np
 import math
+from functools import reduce
+
+import numpy as np
+import scipy.sparse as sp_sparse
+from index_class import Index
+from util import get_intersection
+
 
 def probabilisticModel(query: list, index: Index, relevant_docs = []) -> dict:
     """
@@ -93,15 +95,18 @@ def vectorialModel(query: list, index: Index) -> list:
               being the rank value of document with given query.
     """
 
+    documents_in_database = index.get_all_docs_ids()
     number_of_documents_in_database = index.get_n_docs()
     unique_words = index.get_all_words()
     number_of_unique_words = len(unique_words)
-    doc_mapping = index.get_all_docs_names()
 
     # creating TDM base (Term Document Matrix)
     tdm = sp_sparse.lil_matrix((number_of_unique_words,
                                 number_of_documents_in_database))
 
+
+    # creating query vector
+    query_vector = np.zeros(number_of_unique_words)
 
     for i in range(number_of_unique_words):
         word = unique_words[i]
@@ -123,27 +128,22 @@ def vectorialModel(query: list, index: Index) -> list:
             # Populating TDM
             tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
 
-
-    # creating norm
-    norm = tdm.power(2).sum(axis=0).A[0]
-    norm = [math.sqrt(norm[i]) for i in range(len(norm))]
-
-    # creating query vector
-    query_vector = np.zeros(number_of_unique_words)
-    for i in range(number_of_unique_words):
-        word = unique_words[i]
         if word in query:
             ni = index.get_n_docs_containing(word)
             idf = math.log2(number_of_documents_in_database/ni)
 
             query_vector[i] = (1 + math.log2(query.count(word)))*idf
 
+    # creating norm
+    norm = tdm.power(2).sum(axis=0).A[0]
+    norm = [math.sqrt(norm[i]) for i in range(len(norm))]
+
     # ranking documents for answer
     answer = []
     ranking = np.zeros(number_of_documents_in_database)
     for j in range(number_of_documents_in_database):
-        ranking[j] = np.dot(query_vector) / norm[j]
-        answer.append((doc_mapping[j], ranking[j]))
+        ranking[j] = tdm.getcol(j).dot(query_vector) / norm[j]
+        answer.append((index.get_doc_name(j), ranking[j]))
 
     return sorted(answer, key = lambda x:x[1])
 
