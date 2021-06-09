@@ -95,50 +95,41 @@ def vectorialModel(query: list, index: Index) -> list:
               being the rank value of document with given query.
     """
 
+    # WARNING: I don't think this is working, it's probably better to revert to the last commit
+
     number_of_documents_in_database = index.get_n_docs()
     unique_words = index.get_all_words()
     number_of_unique_words = len(unique_words)
-
-    # creating TDM base (Term Document Matrix)
-    tdm = sp_sparse.lil_matrix((number_of_unique_words,
-                                number_of_documents_in_database))
 
 
     # creating query vector
     query_vector = sp_sparse.lil_matrix((1,number_of_unique_words))
 
-    for i in range(number_of_unique_words):
-        word = unique_words[i]
-        # list of document and frequency in document
-        # of word word
-        postings = index.get_posting_list(word)
+    norm = sp_sparse.lil_matrix((number_of_unique_words, 1))
 
-        # Number of documents containg word word
-        ni = index.get_n_docs_containing(word)
+    answer = []
 
-        idf = math.log2(number_of_documents_in_database/ni)
+    for doc_name, doc_words in index.get_all_docs():
+        tdv = sp_sparse.lil_matrix((number_of_unique_words, 1))
 
-        # populate TDM
-        for node in postings:
-            docName = node["doc"]
-            docId = index.get_doc_id(docName)
-            frequency_in_doc = node["freq"]
+        for word in doc_words:
+            idf = math.log2(number_of_documents_in_database/index.get_n_docs_containing(word))
+            freq = doc_words.count(word)
 
-            # Populating TDM
-            tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
+            word_index = unique_words.index(word)
 
-        if word in query:
-            ni = index.get_n_docs_containing(word)
-            idf = math.log2(number_of_documents_in_database/ni)
+            tdv[word_index, 0] = (1 + math.log2(freq))*idf
 
-            query_vector[0,i] = (1 + math.log2(query.count(word)))*idf
+            if word in query and not query_vector[0,word_index]:
+                idf = math.log2(number_of_documents_in_database/index.get_n_docs_containing(word))
 
-    # creating norm
-    norm = tdm.power(2).sum(axis=0).A[0]
-    norm = [ math.sqrt(norm[i]) for i in range(len(norm)) ]
+                query_vector[0,word_index] = (1 + math.log2(query.count(word)))*idf
 
-    # ranking documents for answer
-    answer = [ ( index.get_doc_name(j), tdm.getcol(j).dot(query_vector) / norm[j] ) for j in range(number_of_documents_in_database)]
+        norm += tdv.power(2)
+
+        answer.append(( doc_name, tdv.dot(query_vector) ))
+
+    for i, j in norm.nonzero(): norm[i, j] = math.sqrt(norm[i, j].astype('float'))
 
     return sorted(answer, key = lambda x:x[1])
 
