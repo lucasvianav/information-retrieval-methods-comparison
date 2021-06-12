@@ -7,7 +7,7 @@ from index_class import Index
 from util import get_intersection
 
 
-def probabilisticModel(query: list, index: Index, relevant_docs = []) -> dict:
+def probabilisticModel(query: list, index: Index, relevant_docs = []) -> list:
     """
     Applies the probabilistic model for information retrieval to calculate the similarity between
     the query and the indexed documents (considering the passed docs as relevant).
@@ -78,7 +78,7 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> dict:
 
 
     # calculates the similarities between the query an each of the indexed docs
-    return { doc: similarity(words) for doc, words in index.get_all_docs() }
+    return [ { "doc": doc, "sim": similarity(words) } for doc, words in index.get_all_docs() if similarity(words) > 0 ]
 
 def vectorialModel(query: list, index: Index) -> list:
     """
@@ -95,6 +95,7 @@ def vectorialModel(query: list, index: Index) -> list:
               being the rank value of document with given query.
     """
 
+    documents = index.get_all_docs_names()
     number_of_documents_in_database = index.get_n_docs()
     unique_words = index.get_all_words()
     number_of_unique_words = len(unique_words)
@@ -105,7 +106,7 @@ def vectorialModel(query: list, index: Index) -> list:
 
 
     # creating query vector
-    query_vector = np.zeros(number_of_unique_words)
+    query_vector = sp_sparse.lil_matrix((1, number_of_unique_words))
 
     for i in range(number_of_unique_words):
         word = unique_words[i]
@@ -131,18 +132,16 @@ def vectorialModel(query: list, index: Index) -> list:
             ni = index.get_n_docs_containing(word)
             idf = math.log2(number_of_documents_in_database/ni)
 
-            query_vector[i] = (1 + math.log2(query.count(word)))*idf
+            query_vector[0, i] = (1 + math.log2(query.count(word)))*idf
 
     # creating norm
-    norm = tdm.power(2).sum(axis=0).A[0]
-    norm = [math.sqrt(norm[i]) for i in range(len(norm))]
+    pre_norm = tdm.power(2).sum(axis=0).A[0]
 
     # ranking documents for answer
     answer = []
-    ranking = np.zeros(number_of_documents_in_database)
-    for j in range(number_of_documents_in_database):
-        ranking[j] = tdm.getcol(j).dot(query_vector) / norm[j]
-        answer.append((index.get_doc_name(j), ranking[j]))
+    for j, doc in enumerate(documents):
+        similarity = query_vector.dot(tdm.getcol(j)).A[0][0]/math.sqrt(pre_norm[j])
+        if similarity > 10**-5: answer.append({ "doc": doc, "sim": float(similarity) })
 
-    return sorted(answer, key = lambda x:x[1])
+    return sorted(answer, key=lambda element: element["sim"])
 
