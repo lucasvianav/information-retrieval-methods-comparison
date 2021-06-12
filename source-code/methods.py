@@ -143,5 +143,5 @@ def vectorialModel(query: list, index: Index) -> list:
         similarity = query_vector.dot(tdm.getcol(j)).A[0][0]/math.sqrt(pre_norm[j])
         if similarity > 10**-5: answer.append({ "doc": doc, "sim": float(similarity) })
 
-    return sorted(answer, key=lambda element: element["sim"])
+    return sorted(answer, key=lambda element: element["sim"], reverse=True)
 
