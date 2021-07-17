@@ -147,7 +147,7 @@ def extract_lists(list_of_lists: list):
 
     return sorted(reduce(lambda acc, cur: acc + cur, list_of_lists, []))
 
-def get_queries() -> dict:
+def get_queries() -> list:
     """
     Loops through all files in the database (data/) and reads their contents,
     returning it as a doc-content object.
@@ -161,8 +161,8 @@ def get_queries() -> dict:
         <narr> </narr>:   Contains the query's full description.
 
     Return value:
-        dict: objects in which each key is the query's numerical id and each
-              value is it's respective 'title' (the query text).
+        list: list of dicts with the 'id' and 'query' keys and their respective
+              values.
     """
 
     with open(DATA_PATH + QUERIES_FILENAME, 'r') as file:
@@ -171,7 +171,7 @@ def get_queries() -> dict:
                              raw_content,
                              re.DOTALL)
 
-        contents = { id: query for id, query in queries }
+        contents = [ { 'id': id, 'query': query } for id, query in queries ]
 
     return contents
 
