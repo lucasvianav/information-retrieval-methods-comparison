@@ -7,7 +7,6 @@ STEM_WORDS = True
 
 database_contents = get_db_content()
 index = Index(database_contents, FILTER_STOPWORDS, STEM_WORDS)
-
 queries = get_queries()
 
 results = [
@@ -19,3 +18,7 @@ results = [
         }
     } for query in queries
 ]
+
+for result in results:
+    # performs the evaluation here
+    pass
