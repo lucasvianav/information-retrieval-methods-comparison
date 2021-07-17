@@ -1,5 +1,7 @@
 from functools import reduce
+
 from util import *
+
 
 class Index:
     """

@@ -1,20 +1,25 @@
-from glob import glob
-from nltk import download, word_tokenize
-from nltk.stem import WordNetLemmatizer, SnowballStemmer
-from nltk.corpus import stopwords as stpw
-from functools import reduce
 import re
+from functools import reduce
+from glob import glob
+
+from nltk import download, word_tokenize
+from nltk.corpus import stopwords as stpw
+from nltk.stem import SnowballStemmer, WordNetLemmatizer
 
 # download('punkt')
 # download('wordnet')
 # download('stopwords')
 
-DATABASE_DIRECTORY_PATH = './data/en.doc.2010/TELEGRAPH_UTF8/'
+DATA_PATH = './data/'
+DATABASE_DIRECTORY_PATH = DATA_PATH + 'en.doc.2010/TELEGRAPH_UTF8/'
+QUERIES_FILENAME = 'en.topics.76-125.2010.txt'
+QUERIES_RESULT_FILENAME = 'en.qrels.76-125.2010.txt'
 STOP_WORDS = stpw.words('english')
 
 def get_db_content() -> dict:
     """
-    Loops through all files in the database (data/) and reads their contents, returning it as a doc-content object.
+    Loops through all files in the database (data/) and reads their contents,
+    returning it as a doc-content object.
 
     This method will parse documents marked up using the following tags:
         <DOC>: Starting tag of a document.
@@ -23,7 +28,8 @@ def get_db_content() -> dict:
         </DOC>: Ending tag of a document.
 
     Return value:
-        dict: object in which the keys are the doc's identifier and the value is the doc's full content (str)
+        dict: object in which the keys are the doc's identifier and the value
+              is the doc's full content (str).
     """
 
     contents = {}
@@ -140,3 +146,32 @@ def extract_lists(list_of_lists: list):
     """
 
     return sorted(reduce(lambda acc, cur: acc + cur, list_of_lists, []))
+
+def get_queries() -> dict:
+    """
+    Loops through all files in the database (data/) and reads their contents,
+    returning it as a doc-content object.
+
+    This method will parse documents marked up using the following tags:
+        <topics>:         Contains the whole query list.
+        <top> </top>:     Contains the query's data.
+        <num> </num>:     Contains the query's id.
+        <title> </title>: Contains the query.
+        <desc> </desc>:   Contains the query's brief description.
+        <narr> </narr>:   Contains the query's full description.
+
+    Return value:
+        dict: objects in which each key is the query's numerical id and each
+              value is it's respective 'title' (the query text).
+    """
+
+    with open(DATA_PATH + QUERIES_FILENAME, 'r') as file:
+        raw_content = file.read()
+        queries = re.findall(r'<num>(\d+?)</num>.*?<title>(.+?)</title>',
+                             raw_content,
+                             re.DOTALL)
+
+        contents = { id: query for id, query in queries }
+
+    return contents
+
