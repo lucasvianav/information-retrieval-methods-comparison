@@ -1,5 +1,7 @@
 import math
 
+from util import get_intersection
+
 
 class Evaluation:
     """
@@ -18,6 +20,8 @@ class Evaluation:
 
         self.__dcg = None
         self.__idcg = None
+        self.__precision = None
+        self.__recall = None
 
     def dcg(self) -> tuple:
         """
@@ -36,7 +40,7 @@ class Evaluation:
             tuple: the first element is the DCG and the second is the IDCG.
         """
 
-        if not self.__dcg and not self.__idcg:
+        if self.__dcg is None and self.__idcg is None:
             gain = [ 1. if doc in self.truth_set else 0. for doc in self.returned_set ]
             ideal_gain = sorted(gain, reverse=True)
 
@@ -52,3 +56,31 @@ class Evaluation:
             self.__idcg = idcg
 
         return self.__dcg, self.__idcg
+
+    def recall(self) -> float:
+        """
+        Performs the recall evaluation for this query.
+
+        Return value:
+            float: this query's total recall value.
+        """
+
+        if self.__recall is None:
+            intersection = get_intersection(self.returned_set, self.truth_set)
+            self.__recall = len(intersection)/len(self.truth_set)
+
+        return self.__recall
+
+    def precision(self):
+        """
+        Performs the precision evaluation for this query.
+
+        Return value:
+            float: this query's total precision value.
+        """
+
+        if self.__precision is None:
+            intersection = get_intersection(self.returned_set, self.truth_set)
+            self.__precision = len(intersection)/len(self.returned_set)
+
+        return self.__precision
