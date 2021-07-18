@@ -169,7 +169,10 @@ def get_queries() -> list:
                              raw_content,
                              re.DOTALL)
 
-        contents = [ { 'id': id, 'query': query } for id, query in queries ]
+        contents = [
+            { 'id': id, 'query': query.replace('\n', ' ') }
+            for id, query in queries
+        ]
 
     return contents
 
