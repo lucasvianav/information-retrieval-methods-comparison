@@ -26,13 +26,19 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> list:
 
     # key --> word/token
     # value --> names of relevant docs containing that word
-    relevant_containing_word_docs = { word: get_intersection(relevant_docs, docs) for word, docs in containing_word_docs.items() }
+    relevant_containing_word_docs = {
+        word: get_intersection(relevant_docs, docs) for word,
+        docs in containing_word_docs.items()
+    }
 
     # n_ == number of
     n_docs = index.get_n_docs() # N
     n_containing_word = { word: index.get_n_docs_containing(word) for word in query } # n_i
     n_relevant = len(relevant_docs) # R
-    n_relevant_containing_word = { word: len(docs) for word, docs in relevant_containing_word_docs.items() } # r_i
+    n_relevant_containing_word = { # r_i
+        word: len(docs) for word,
+        docs in relevant_containing_word_docs.items()
+    }
 
     def similarity(doc: list) -> float:
         """
