@@ -115,48 +115,53 @@ def vectorialModel(query: list, index: Index) -> list:
     tdm = sp_sparse.lil_matrix((number_of_unique_words,
                                 number_of_documents_in_database))
 
-
     # creating query vector
     query_vector = sp_sparse.lil_matrix((1, number_of_unique_words))
 
     for i in range(number_of_unique_words):
-        word = unique_words[i]
+      word = unique_words[i]
         # list of document and frequency in document
         # of word word
-        postings = index.get_posting_list(word)
+      postings = index.get_posting_list(word)
 
         # Number of documents containg word word
-        ni = index.get_n_docs_containing(word)
+      ni = index.get_n_docs_containing(word)
 
-        idf = math.log2(number_of_documents_in_database/ni)
+      idf = math.log2(number_of_documents_in_database/ni)
 
         # populate TDM
-        for node in postings:
-            docName = node["doc"]
-            docId = index.get_doc_id(docName)
-            frequency_in_doc = node["freq"]
+      for node in postings:
+        docName = node["doc"]
+        docId = index.get_doc_id(docName)
+        frequency_in_doc = node["freq"]
 
             # Populating TDM
-            tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
+        tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
 
         if word in query:
-            ni = index.get_n_docs_containing(word)
-            idf = math.log2(number_of_documents_in_database/ni)
+          ni = index.get_n_docs_containing(word)
+          idf = math.log2(number_of_documents_in_database/ni)
 
-            query_vector[0, i] = (1 + math.log2(query.count(word)))*idf
+          query_vector[0, i] = (1 + math.log2(query.count(word)))*idf
 
     # creating norm
-    pre_norm = tdm.power(2).sum(axis=0).A[0]
+    norm = tdm.power(2).sum(axis=0).A[0]
+
+    # converting to more efficient type of sparse matrix
+    query_vector_csr = query_vector.tocsr()
+    tdm_csr = tdm.tocsr()
 
     # ranking documents for answer
     answer = []
+
     for j, doc in enumerate(documents):
-        similarity = query_vector.dot(tdm.getcol(j)).A[0][0]/math.sqrt(pre_norm[j])
-        if similarity > 10**-5: answer.append({ "doc": doc, "sim": float(similarity) })
+      similarity = query_vector_csr.dot(tdm_csr.getcol(j)).A[0][0] / math.sqrt(norm[j])
+
+      if similarity > 10**-2:
+        answer.append({ "doc": doc, "sim": float(similarity) })
 
     # sorts the answer by similarity
     answer.sort(key=lambda element: element["sim"], reverse=True)
 
     # returns only the doc names
     return [ doc['doc'] for doc in answer ]
-
