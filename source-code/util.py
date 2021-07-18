@@ -42,8 +42,7 @@ def get_db_content() -> dict:
     # nation, sports, business, etc). Total of 125586 documents.
 
     # list of all year directories in the database
-    # publication_years = glob(DATABASE_DIRECTORY_PATH + '*')
-    publication_years = ['./data/en.doc.2010/TELEGRAPH_UTF8/2004_utf8']
+    publication_years = glob(DATABASE_DIRECTORY_PATH + '*')
 
     # loops through all files
     for year in publication_years:
