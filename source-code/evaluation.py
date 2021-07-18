@@ -106,3 +106,33 @@ class Evaluation:
         intersection = get_intersection(self.returned_set[:(N+1)],
                                         self.truth_set)
         return len(intersection)/len(self.truth_set)
+
+    def precision_recall_interpol(self) -> dict:
+        """
+        Calculates the 11-points precision x recall interpolations values.
+
+        Return value:
+            dict: contains the 'precision' and 'recall' keys with their
+                  respective points.
+        """
+
+        return_value = {
+            'precision': [],
+            'recall': [ i/10 for i in range(11) ]
+        }
+
+        # raw precision x recall
+        # values (not interpolated)
+        raw = { 'precision': [], 'recall': [] }
+
+        for relevant_doc in self.intersection:
+            i = self.returned_set.index(relevant_doc)
+            raw['precision'].append(self.__precisionAtN(i))
+            raw['recall'].append(self.__recallAtN(i))
+
+        for recall in return_value['recall']:
+            filtered = [ i for i, rec in enumerate(raw['recall']) if rec >=
+                        recall ]
+            return_value['precision'].append(max([ raw['precision'][i] for i in filtered ]))
+
+        return return_value
