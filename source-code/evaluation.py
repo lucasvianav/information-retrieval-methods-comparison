@@ -1,4 +1,5 @@
 import math
+from functools import reduce
 
 from util import get_intersection
 
@@ -107,7 +108,7 @@ class Evaluation:
                                         self.truth_set)
         return len(intersection)/len(self.truth_set)
 
-    def precision_recall_interpol(self) -> dict:
+    def getPrecisionRecallInterpol(self) -> dict:
         """
         Calculates the 11-points precision x recall interpolations values.
 
@@ -136,3 +137,18 @@ class Evaluation:
             return_value['precision'].append(max([ raw['precision'][i] for i in filtered ]))
 
         return return_value
+
+    def getMAP(self) -> float:
+        """
+        Calculates the 11-points precision x recall interpolations values.
+
+        Return value:
+            dict: contains the 'precision' and 'recall' keys with their
+            respective points.
+        """
+
+        precision = reduce(lambda acc, cur: acc + self.__precisionAtN(cur),
+                           self.truth_set, 0.)
+
+        return precision/len(self.truth_set)
+
