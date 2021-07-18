@@ -71,7 +71,7 @@ class Evaluation:
 
         return self.__recall
 
-    def precision(self):
+    def precision(self) -> float:
         """
         Performs the precision evaluation for this query.
 
