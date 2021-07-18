@@ -21,6 +21,18 @@ results = [
     } for query in queries
 ]
 
+map_probabilistic = 0.0
+map_vectorial = 0.0
 for result in results:
     # performs the evaluation here
-    pass
+    eval_prob = Evaluation(
+        result['results']['probabilistic'],
+        truth_set[result['query']])
+    eval_vec = Evaluation(
+        result['results']['vectorial'],
+        truth_set[result['query']])
+    map_probabilistic = eval_prob.get_MAP_i()
+    map_vectorial = eval_vec.get_MAP_i()
+
+map_probabilistic = map_probabilistic/len(results)
+map_vectorial = map_vectorial/len(results)
