@@ -17,13 +17,14 @@ class Evaluation:
     def __init__(self, returned_set: list, truth_set: list):
         self.returned_set = returned_set
         self.truth_set = truth_set
+        self.intersection = get_intersection(returned_set, truth_set)
 
         self.__dcg = None
         self.__idcg = None
-        self.__precision = None
-        self.__recall = None
+        self.__precision = len(self.intersection)/len(returned_set)
+        self.__recall = len(self.intersection)/len(truth_set)
 
-    def dcg(self) -> tuple:
+    def getDCG(self) -> tuple:
         """
         Performs the DCG (discounted accumulated gain) evaluation for this
         query and returns the DCG vector as well as the IDCG (the DCG's ideal
@@ -57,7 +58,7 @@ class Evaluation:
 
         return self.__dcg, self.__idcg
 
-    def recall(self) -> float:
+    def getRecall(self) -> float:
         """
         Performs the recall evaluation for this query.
 
@@ -65,23 +66,15 @@ class Evaluation:
             float: this query's total recall value.
         """
 
-        if self.__recall is None:
-            intersection = get_intersection(self.returned_set, self.truth_set)
-            self.__recall = len(intersection)/len(self.truth_set)
-
         return self.__recall
 
-    def precision(self) -> float:
+    def getPrecision(self) -> float:
         """
         Performs the precision evaluation for this query.
 
         Return value:
             float: this query's total precision value.
         """
-
-        if self.__precision is None:
-            intersection = get_intersection(self.returned_set, self.truth_set)
-            self.__precision = len(intersection)/len(self.returned_set)
 
         return self.__precision
 
