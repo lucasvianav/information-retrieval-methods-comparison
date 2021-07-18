@@ -92,3 +92,17 @@ class Evaluation:
         intersection = get_intersection(self.returned_set[:(N+1)], self.truth_set)
         return len(intersection)/(N+1)
 
+    def __recallAtN(self, N: int) -> float:
+        """
+        Performs the recall evaluation for this query.
+
+        Parameters:
+            N (int): last element do be considered's index.
+
+        Return value:
+            float: parcial recall at N.
+        """
+
+        intersection = get_intersection(self.returned_set[:(N+1)],
+                                        self.truth_set)
+        return len(intersection)/len(self.truth_set)
