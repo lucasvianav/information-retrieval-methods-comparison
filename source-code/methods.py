@@ -1,7 +1,6 @@
 import math
 from functools import reduce
 
-import numpy as np
 import scipy.sparse as sp_sparse
 from index_class import Index
 from util import get_intersection
@@ -18,7 +17,7 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> list:
         relevante_docs (list | []): names of relevant docs for that query (default empty list).
 
     Return value:
-        dict: doc names as keys and their similarity to the query as values (float).
+        list: list containing the doc names sorted by similarity.
     """
 
     # key --> word/token
@@ -76,9 +75,15 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> list:
         # uses the reduce() function to calculate the similarity between the query and the doc
         return reduce(similarity_i, get_intersection(query, doc), 0)
 
-
     # calculates the similarities between the query an each of the indexed docs
-    return [ { "doc": doc, "sim": similarity(words) } for doc, words in index.get_all_docs() if similarity(words) > 0 ]
+    answer = [
+        { "doc": doc, "sim": similarity(words) }
+        for doc, words in index.get_all_docs() if similarity(words) > 0
+    ]
+    answer.sort(key=lambda element: element["sim"], reverse=True)
+
+    # returns only the doc names
+    return [ doc['doc'] for doc in answer ]
 
 def vectorialModel(query: list, index: Index) -> list:
     """
@@ -143,5 +148,9 @@ def vectorialModel(query: list, index: Index) -> list:
         similarity = query_vector.dot(tdm.getcol(j)).A[0][0]/math.sqrt(pre_norm[j])
         if similarity > 10**-5: answer.append({ "doc": doc, "sim": float(similarity) })
 
-    return sorted(answer, key=lambda element: element["sim"], reverse=True)
+    # sorts the answer by similarity
+    answer.sort(key=lambda element: element["sim"], reverse=True)
+
+    # returns only the doc names
+    return [ doc['doc'] for doc in answer ]
 
