@@ -149,10 +149,9 @@ def extract_lists(list_of_lists: list):
 
 def get_queries() -> list:
     """
-    Loops through all files in the database (data/) and reads their contents,
-    returning it as a doc-content object.
+    Parses the query-list document and returns the list of queries.
 
-    This method will parse documents marked up using the following tags:
+    This method will parse queries marked up using the following tags:
         <topics>:         Contains the whole query list.
         <top> </top>:     Contains the query's data.
         <num> </num>:     Contains the query's id.
@@ -172,6 +171,41 @@ def get_queries() -> list:
                              re.DOTALL)
 
         contents = [ { 'id': id, 'query': query } for id, query in queries ]
+
+    return contents
+
+def get_queries_truth_set() -> dict:
+    """
+    Parses the results document and returns each query's truth set (list of
+    relevant documents for that query).
+
+    This method will parse queries marked up using the following columns:
+        1st column: query id.
+        2nd column: irrelevant.
+        3rd column: document title.
+        4th column: relevancy ('1' for relevant, '0' for irrelevant).
+
+    Return value:
+        dict: objects in which each key is the query's numerical id and each
+              value is it's truth set.
+    """
+
+    contents = {}
+
+    with open(DATA_PATH + QUERIES_RESULT_FILENAME, 'r') as file:
+        raw_content = file.read()
+        results = re.findall(r'^(\d+?)\s\S{2}\s(\S+?)\s1$',
+                             raw_content,
+                             re.MULTILINE)
+
+
+        for result in results:
+            query_id, relevant_doc = result
+
+            if query_id in contents.keys():
+                contents[query_id].append(relevant_doc)
+
+            else: contents[query_id] = [ relevant_doc ]
 
     return contents
 
