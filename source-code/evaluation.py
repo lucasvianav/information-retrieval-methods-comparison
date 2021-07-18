@@ -22,8 +22,6 @@ class Evaluation:
         self.__idcg = None
         self.__precision = None
         self.__recall = None
-        self.__precision_at_5 = None
-        self.__precision_at_10 = None
 
     def dcg(self) -> tuple:
         """
@@ -69,7 +67,7 @@ class Evaluation:
 
         if self.__recall is None:
             intersection = get_intersection(self.returned_set, self.truth_set)
-            self.__recall = float(len(intersection))/len(self.truth_set)
+            self.__recall = len(intersection)/len(self.truth_set)
 
         return self.__recall
 
@@ -83,10 +81,21 @@ class Evaluation:
 
         if self.__precision is None:
             intersection = get_intersection(self.returned_set, self.truth_set)
-            self.__precision = float(len(intersection))/len(self.returned_set)
+            self.__precision = len(intersection)/len(self.returned_set)
 
         return self.__precision
 
-    def precision_at_N(self, N):
-        intersection = get_intersection(self.returned_set[:N], self.truth_set)
-        return float(intersection)/N
+    def __precisionAtN(self, N: int) -> float:
+        """
+        Performs the precision evaluation for this query.
+
+        Parameters:
+            N (int): last element do be considered's index.
+
+        Return value:
+            float: parcial precision at N.
+        """
+
+        intersection = get_intersection(self.returned_set[:(N+1)], self.truth_set)
+        return len(intersection)/(N+1)
+
