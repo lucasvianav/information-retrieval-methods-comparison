@@ -7,7 +7,9 @@ STEM_WORDS = True
 
 database_contents = get_db_content()
 index = Index(database_contents, FILTER_STOPWORDS, STEM_WORDS)
+
 queries = get_queries()
+truth_set = get_queries_truth_set()
 
 results = [
     {
