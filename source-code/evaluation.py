@@ -147,8 +147,11 @@ class Evaluation:
             respective points.
         """
 
-        precision = reduce(lambda acc, cur: acc + self.__precisionAtN(cur),
-                           self.truth_set, 0.)
+        # reduce function
+        def reduceFn(acc, cur):
+            return acc + self.__precisionAtN(self.returned_set.index(cur))
+
+        precision = reduce(reduceFn, self.intersection, 0.0)
 
         return precision/len(self.truth_set)
 
