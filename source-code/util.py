@@ -1,6 +1,7 @@
 import re
 from functools import reduce
 from glob import glob
+from typing import Dict, List
 
 from nltk import download, word_tokenize
 from nltk.corpus import stopwords as stpw
@@ -16,7 +17,7 @@ QUERIES_FILENAME = 'en.topics.76-125.2010.txt'
 QUERIES_RESULT_FILENAME = 'en.qrels.76-125.2010.txt'
 STOP_WORDS = stpw.words('english')
 
-def get_db_content() -> dict:
+def get_db_content() -> Dict[str, str]:
     """
     Loops through all files in the database (data/) and reads their contents,
     returning it as a doc-content object.
@@ -102,7 +103,7 @@ def stem(word: str, language='english') -> str:
 
     return SnowballStemmer(language).stem(word)
 
-def get_intersection(list1, list2) -> list:
+def get_intersection(list1: list, list2: list) -> list:
     """
     Uses the list comprehension to get the intersection between two lists (lists of lists are supported).
 
@@ -133,12 +134,14 @@ def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list:
         if word not in ( STOP_WORDS if filter_stopwords else [] ) # ignores stopwords if the filter is activated
     ]
 
-def extract_lists(list_of_lists: list):
+def extract_lists(list_of_lists: List[list]):
     """
-    Uses the reduce() method to extract all inner elements of a list of lists into the outer list - turning the list of lists into a simple list. It also sorts the resulting list.
+    Uses the reduce() method to extract all inner elements of a list of lists
+    into the outer list - turning the list of lists into a simple list. It also
+    sorts the resulting list.
 
     Parameters:
-        list_of_lists (list): any list that contains other lists
+        list_of_lists (list<list>): any list that contains other lists
 
     Return value:
         list: all inner elements from the passed list_of_lists sorted.
@@ -146,7 +149,7 @@ def extract_lists(list_of_lists: list):
 
     return sorted(reduce(lambda acc, cur: acc + cur, list_of_lists, []))
 
-def get_queries() -> list:
+def get_queries() -> List[Dict[str, str]]:
     """
     Parses the query-list document and returns the list of queries.
 
@@ -176,7 +179,7 @@ def get_queries() -> list:
 
     return contents
 
-def get_queries_truth_set() -> dict:
+def get_queries_truth_set() -> Dict[str, List[str]]:
     """
     Parses the results document and returns each query's truth set (list of
     relevant documents for that query).
