@@ -16,14 +16,14 @@ class Evaluation:
     """
 
     def __init__(self, returned_set: list, truth_set: list):
-        self.returned_set = returned_set
-        self.truth_set = truth_set
-        self.intersection = get_intersection(returned_set, truth_set)
+        self.__returned_set = returned_set
+        self.__truth_set    = truth_set
+        self.__intersection = get_intersection(returned_set, truth_set)
 
-        self.__dcg = None
-        self.__idcg = None
-        self.__precision = len(self.intersection)/len(returned_set)
-        self.__recall = len(self.intersection)/len(truth_set)
+        self.__dcg        = None
+        self.__idcg       = None
+        self.__precision  = len(self.__intersection)/len(returned_set)
+        self.__recall     = len(self.__intersection)/len(truth_set)
 
     def getDCG(self) -> tuple:
         """
@@ -43,7 +43,7 @@ class Evaluation:
         """
 
         if self.__dcg is None and self.__idcg is None:
-            gain = [ 1. if doc in self.truth_set else 0. for doc in self.returned_set ]
+            gain = [ 1. if doc in self.__truth_set else 0. for doc in self.__returned_set ]
             ideal_gain = sorted(gain, reverse=True)
 
             dcg = [ gain[0] ]
@@ -90,7 +90,7 @@ class Evaluation:
             float: parcial precision at N.
         """
 
-        intersection = get_intersection(self.returned_set[:(N+1)], self.truth_set)
+        intersection = get_intersection(self.__returned_set[:(N+1)], self.__truth_set)
         return len(intersection)/(N+1)
 
     def __recallAtN(self, N: int) -> float:
@@ -104,9 +104,9 @@ class Evaluation:
             float: parcial recall at N.
         """
 
-        intersection = get_intersection(self.returned_set[:(N+1)],
-                                        self.truth_set)
-        return len(intersection)/len(self.truth_set)
+        intersection = get_intersection(self.__returned_set[:(N+1)],
+                                        self.__truth_set)
+        return len(intersection)/len(self.__truth_set)
 
     def getPrecisionRecallInterpol(self) -> dict:
         """
@@ -126,8 +126,8 @@ class Evaluation:
         # values (not interpolated)
         raw = { 'precision': [], 'recall': [] }
 
-        for relevant_doc in self.intersection:
-            i = self.returned_set.index(relevant_doc)
+        for relevant_doc in self.__intersection:
+            i = self.__returned_set.index(relevant_doc)
             raw['precision'].append(self.__precisionAtN(i))
             raw['recall'].append(self.__recallAtN(i))
 
@@ -149,9 +149,9 @@ class Evaluation:
 
         # reduce function
         def reduceFn(acc, cur):
-            return acc + self.__precisionAtN(self.returned_set.index(cur))
+            return acc + self.__precisionAtN(self.__returned_set.index(cur))
 
-        precision = reduce(reduceFn, self.intersection, 0.0)
+        precision = reduce(reduceFn, self.__intersection, 0.0)
 
-        return precision/len(self.truth_set)
+        return precision/len(self.__truth_set)
 
