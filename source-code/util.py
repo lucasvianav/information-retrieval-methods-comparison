@@ -131,19 +131,42 @@ def get_sum(list1: List[Number], list2: List[Number]) -> List[Number]:
 
     return [ a + b for a, b in zip(list1, list2) ]
 
-def get_division(list1: List[Number], list2: List[Number]) -> List[Number]:
+def get_division(list1: List[Number], **kwargs) -> List[Number]:
     """
     Performs the item-wise division of two lists of numbers (either int or
-    float).
+    float) or between a list of number and a number.
+
+    Either "list2" or "number" must be provided as second argument. If both are
+    received, an error will be thrown.
 
     Parameters:
-        list1 (list<int, float>), list2 (list<int, float>): lists to be summed.
+        list1 (list<int, float>): lists to be divided.
+        list2 (list<int, float>): list do divide list1 by.
+        number (int, float): number to divide list1 by.
 
     Return value:
         list<int, float>: item-wise division between list1 and list2.
     """
 
-    return [ a / b for a, b in zip(list1, list2) ]
+    result = []
+
+    if 'list2' in kwargs and 'number' in kwargs:
+        raise ValueError('Either a list of numbers or a number must be\
+                          provided to get_division(), but no both.')
+
+    elif 'list2' in kwargs:
+        list2 = list(kwargs['list2'])
+        result = [ a / b for a, b in zip(list1, list2) ]
+
+    elif 'number' in kwargs:
+        number = float(kwargs['number'])
+        result = [ a / number for a in list1 ]
+
+    else:
+        raise ValueError('Either a list of numbers or a number must be\
+                         provided to get_division().')
+
+    return result
 
 def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list:
     """
