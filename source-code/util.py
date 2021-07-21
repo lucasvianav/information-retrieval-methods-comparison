@@ -1,7 +1,7 @@
 import re
 from functools import reduce
 from glob import glob
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from nltk import download, word_tokenize
 from nltk.corpus import stopwords as stpw
@@ -16,6 +16,8 @@ DATABASE_DIRECTORY_PATH = DATA_PATH + 'en.doc.2010/TELEGRAPH_UTF8/'
 QUERIES_FILENAME = 'en.topics.76-125.2010.txt'
 QUERIES_RESULT_FILENAME = 'en.qrels.76-125.2010.txt'
 STOP_WORDS = stpw.words('english')
+
+Number = Union[float, int]
 
 def get_db_content() -> Dict[str, str]:
     """
@@ -115,6 +117,19 @@ def get_intersection(list1: list, list2: list) -> list:
     """
 
     return [ e for e in list1 if e in list2 ]
+
+def get_sum(list1: List[Number], list2: List[Number]) -> List[Number]:
+    """
+    Performs the item-wise sum of two lists of numbers (either int or float).
+
+    Parameters:
+        list1 (list<int, float>), list2 (list<int, float>): lists to be summed.
+
+    Return value:
+        list<int, float>: item-wise sum between list1 and list2.
+    """
+
+    return [ a + b for a, b in zip(list1, list2) ]
 
 def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list:
     """
