@@ -1,6 +1,6 @@
 import math
 from functools import reduce
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from util import get_intersection
 
@@ -21,8 +21,8 @@ class Evaluation:
         self.__truth_set    = truth_set
         self.__intersection = get_intersection(returned_set, truth_set)
 
-        self.__dcg        = None
-        self.__idcg       = None
+        self.__dcg        = []
+        self.__idcg       = []
         self.__precision  = len(self.__intersection)/len(returned_set)
         self.__recall     = len(self.__intersection)/len(truth_set)
 
@@ -44,8 +44,11 @@ class Evaluation:
                                  the IDCG.
         """
 
-        if self.__dcg is None and self.__idcg is None:
-            gain = [ 1. if doc in self.__truth_set else 0. for doc in self.__returned_set ]
+        if not self.__dcg and not self.__idcg:
+            gain = [
+                1. if doc in self.__truth_set else 0.
+                for doc in self.__returned_set
+            ]
             ideal_gain = sorted(gain, reverse=True)
 
             dcg = [ gain[0] ]
