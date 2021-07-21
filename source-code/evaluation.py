@@ -1,5 +1,6 @@
 import math
 from functools import reduce
+from typing import Dict, List, Tuple
 
 from util import get_intersection
 
@@ -25,7 +26,7 @@ class Evaluation:
         self.__precision  = len(self.__intersection)/len(returned_set)
         self.__recall     = len(self.__intersection)/len(truth_set)
 
-    def getDCG(self) -> tuple:
+    def getDCG(self) -> Tuple[List[float], List[float]]:
         """
         Performs the DCG (discounted accumulated gain) evaluation for this
         query and returns the DCG vector as well as the IDCG (the DCG's ideal
@@ -39,7 +40,8 @@ class Evaluation:
         with the document list as the x-axis.
 
         Return value:
-            tuple: the first element is the DCG and the second is the IDCG.
+            tuple<list<float>>>: the first element is the DCG and the second is
+                                 the IDCG.
         """
 
         if self.__dcg is None and self.__idcg is None:
@@ -108,7 +110,7 @@ class Evaluation:
                                         self.__truth_set)
         return len(intersection)/len(self.__truth_set)
 
-    def getPrecisionRecallInterpol(self) -> dict:
+    def getPrecisionRecallInterpol(self) -> Dict[str, float]:
         """
         Calculates the 11-points precision x recall interpolations values.
 
