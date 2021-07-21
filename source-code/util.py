@@ -131,6 +131,20 @@ def get_sum(list1: List[Number], list2: List[Number]) -> List[Number]:
 
     return [ a + b for a, b in zip(list1, list2) ]
 
+def get_division(list1: List[Number], list2: List[Number]) -> List[Number]:
+    """
+    Performs the item-wise division of two lists of numbers (either int or
+    float).
+
+    Parameters:
+        list1 (list<int, float>), list2 (list<int, float>): lists to be summed.
+
+    Return value:
+        list<int, float>: item-wise division between list1 and list2.
+    """
+
+    return [ a / b for a, b in zip(list1, list2) ]
+
 def parse_text(text: str, filter_stopwords: bool, stem_words: bool) -> list:
     """
     Removes all special characters from and tokenizes a text, then normalizes and lemmatizes each token (word).
