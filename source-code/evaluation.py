@@ -110,19 +110,17 @@ class Evaluation:
                                         self.__truth_set)
         return len(intersection)/len(self.__truth_set)
 
-    def getPrecisionRecallInterpol(self) -> Dict[str, float]:
+    def getInterpol(self) -> Tuple[List[float], List[float]]:
         """
         Calculates the 11-points precision x recall interpolations values.
 
         Return value:
-            dict: contains the 'precision' and 'recall' keys with their
-                  respective points.
+            tuple<list<float>>>: the first element is the precision points and
+                                 the second is the recall's ones.
         """
 
-        return_value = {
-            'precision': [],
-            'recall': [ i/10 for i in range(11) ]
-        }
+        # first element is precision, second is recall
+        return_value = ( [], [ i/10 for i in range(11) ] )
 
         # raw precision x recall
         # values (not interpolated)
@@ -133,10 +131,12 @@ class Evaluation:
             raw['precision'].append(self.__precisionAtN(i))
             raw['recall'].append(self.__recallAtN(i))
 
-        for recall in return_value['recall']:
-            filtered = [ i for i, rec in enumerate(raw['recall']) if rec >=
-                        recall ]
-            return_value['precision'].append(max([ raw['precision'][i] for i in filtered ]))
+        for recall in return_value[1]:
+            filtered = [
+                i for i, rec in enumerate(raw['recall'])
+                if rec >= recall
+            ]
+            return_value[0].append(max([raw['precision'][i] for i in filtered]))
 
         return return_value
 
