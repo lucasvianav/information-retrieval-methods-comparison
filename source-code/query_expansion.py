@@ -3,26 +3,26 @@ from index_class import Index
 from util import extract_lists
 
 
-def implicit_feedback(index: Index, query: list, ranking: dict, N: int) -> list:
+def implicit_feedback(index: Index, query: list, ranking: list, N: int) -> list:
     """
     Method to expand the received query by implicit feedback.
 
     Parameters:
         index (Index): the database index.
         query (list): the original query as a list of words/tokens.
-        ranking (dict): the applied retrieval information method's result as a dict containing the doc names as keys and their similarity to the query as values (float).
+        ranking (list<str>): the applied retrieval information method's result
+                             as a list of documents.
         N (int): number of similar words to be returned for each token in the query.
 
     Return value:
         list: the new query as a list of word/tokens.
     """
 
-    retrieved_docs = [ doc for doc, _ in sorted(ranking.items(), key=lambda doc: doc[1]) ] # D_l
-    retrieved_vocabulary = index.get_all_words_in_docs(retrieved_docs) # V_l
+    retrieved_vocabulary = index.get_all_words_in_docs(ranking) # V_l
 
     # matrix with the frequency of each word in each doc
     term_doc_matrix = np.array([  # M_l
-        [ index.get_frequency_in_doc(word, doc) for word in retrieved_vocabulary ] for doc in retrieved_docs
+        [ index.get_frequency_in_doc(word, doc) for word in retrieved_vocabulary ] for doc in ranking
     ])
 
     # matrix correlating the words with each other
