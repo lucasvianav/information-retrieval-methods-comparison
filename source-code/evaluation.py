@@ -26,7 +26,7 @@ class Evaluation:
         self.__precision  = len(self.__intersection)/len(returned_set)
         self.__recall     = len(self.__intersection)/len(truth_set)
 
-    def getDCG(self) -> Tuple[List[float], List[float]]:
+    def getDCG(self, length: int = 15) -> Tuple[List[float], List[float]]:
         """
         Performs the DCG (discounted accumulated gain) evaluation for this
         query and returns the DCG vector as well as the IDCG (the DCG's ideal
@@ -39,6 +39,9 @@ class Evaluation:
         In order to better compare the two models, you may plot this results
         with the document list as the x-axis.
 
+        Parameters:
+            length (int, default 15): the ranking's length to consider.
+
         Return value:
             tuple<list<float>>>: the first element is the DCG and the second is
                                  the IDCG.
@@ -47,16 +50,16 @@ class Evaluation:
         if not self.__dcg and not self.__idcg:
             gain = [
                 1. if doc in self.__truth_set else 0.
-                for doc in self.__returned_set
+                for doc in self.__returned_set[:length]
             ]
             ideal_gain = sorted(gain, reverse=True)
 
             dcg = [ gain[0] ]
-            for i in range(1, len(gain)):
+            for i in range(1, length):
                 dcg.append(gain[i]/math.log2(i+1) + dcg[i-1])
 
             idcg = [ ideal_gain[0] ]
-            for i in range(1, len(ideal_gain)):
+            for i in range(1, length):
                 idcg.append(ideal_gain[i]/math.log2(i+1) + idcg[i-1])
 
             self.__dcg = dcg
