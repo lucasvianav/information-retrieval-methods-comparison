@@ -128,7 +128,7 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
             'map': metrics['vectorial']['map']/no_queries,
             'interpol': {
                 'precision': vectorial_precisions,
-                'recall': metrics['probab']['interpol'][1]
+                'recall': metrics['vectorial']['interpol'][1]
             },
             'ndcg': get_division(vectorial_dcg, list2=vectorial_idcg)
         }
