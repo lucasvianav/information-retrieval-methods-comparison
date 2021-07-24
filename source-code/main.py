@@ -1,3 +1,4 @@
+import gc
 
 from evaluation import Evaluation
 from index_class import Index
@@ -17,18 +18,18 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
     metrics = {
         'probab': {
             'precision': 0.,
-            'recall': 0.,
-            'map': 0.,
-            'interpol': ([], []),
-            'dcg': ([], [])
+            'recall':    0.,
+            'map':       0.,
+            'interpol':  ([], []),
+            'dcg':       ([], [])
         },
 
         'vectorial': {
             'precision': 0.,
-            'recall': 0.,
-            'map': 0.,
-            'interpol': ([], []),
-            'dcg': ([], [])
+            'recall':    0.,
+            'map':       0.,
+            'interpol':  ([], []),
+            'dcg':       ([], [])
         }
     }
 
@@ -37,20 +38,19 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
         truth_set = truth_sets[query['id']]
         query_vector = parse_text(query['query'], filter_stopwords, stem_words)
 
-        # the returned rankings
-        probabilistic = probabilisticModel(query_vector, index)
-        vectorial = vectorialModel(query_vector, index)
 
-        # exands queries if necessary
+        # PROBABILISTIC MODEL _____________
+
+        # the returned ranking for the probabilistic model
+        probabilistic = probabilisticModel(query_vector, index)
+
+        # exands the query if necessary
         if expand_queries:
             new_query = implicit_feedback(index, query_vector, probabilistic, 2)
             probabilistic = probabilisticModel(new_query, index)
 
-            new_query = implicit_feedback(index, query_vector, vectorial, 2)
-            vectorial = vectorialModel(new_query, index)
-
+        # evaluation for the probabilistic model
         evalProb = Evaluation(probabilistic, truth_set)
-        evalVect = Evaluation(vectorial, truth_set)
 
         # saves this query's probabilistic evaluation metrics
         metrics['probab']['precision'] += evalProb.getPrecision()
@@ -70,6 +70,28 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
             evalProb.getInterpol()[1]
         )
 
+        # frees memory (RIP Google Colab's RAM)
+        del probabilistic
+        del evalProb
+        del dcg
+        del interpol
+        gc.collect()
+
+
+
+
+        # VECTORIAL MODEL _________________
+
+        # the returned ranking for the vectorial model
+        vectorial = vectorialModel(query_vector, index)
+
+        # exands the query if necessary
+        if expand_queries:
+            new_query = implicit_feedback(index, query_vector, vectorial, 2)
+            vectorial = vectorialModel(new_query, index)
+
+        # evaluation for the vectorial model
+        evalVect = Evaluation(vectorial, truth_set)
 
         # saves this query's vectorial evaluation metrics
         metrics['vectorial']['precision'] += evalVect.getPrecision()
@@ -89,13 +111,22 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
             evalVect.getInterpol()[1]
         )
 
+        # frees memory (RIP Google Colab's RAM)
+        del vectorial
+        del evalVect
+        del dcg
+        del interpol
+        del truth_set
+        del query_vector
+        gc.collect()
+
 
     no_queries = len(queries)
 
     # calculates the precisions' mean values
-    probabilistic_precisions = get_division(metrics['probab']['interpol'],
+    probabilistic_precisions = get_division(metrics['probab']['interpol'][0],
                                             number=no_queries)
-    vectorial_precisions = get_division(metrics['vectorial']['interpol'],
+    vectorial_precisions = get_division(metrics['vectorial']['interpol'][0],
                                         number=no_queries)
 
     # calculates the probabilistic model's DCG and IDCG
@@ -113,22 +144,22 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
     return {
         'probab': {
             'precision': metrics['probab']['precision']/no_queries,
-            'recall': metrics['probab']['recall']/no_queries,
-            'map': metrics['probab']['map']/no_queries,
+            'recall':    metrics['probab']['recall']/no_queries,
+            'map':       metrics['probab']['map']/no_queries,
             'interpol': {
                 'precision': probabilistic_precisions,
-                'recall': metrics['probab']['interpol'][1]
+                'recall':    metrics['probab']['interpol'][1]
             },
             'ndcg': get_division(probabilistic_dcg, list2=probabilistic_idcg)
         },
 
         'vectorial': {
             'precision': metrics['vectorial']['precision']/no_queries,
-            'recall': metrics['vectorial']['recall']/no_queries,
-            'map': metrics['vectorial']['map']/no_queries,
+            'recall':    metrics['vectorial']['recall']/no_queries,
+            'map':       metrics['vectorial']['map']/no_queries,
             'interpol': {
                 'precision': vectorial_precisions,
-                'recall': metrics['probab']['interpol'][1]
+                'recall':    metrics['vectorial']['interpol'][1]
             },
             'ndcg': get_division(vectorial_dcg, list2=vectorial_idcg)
         }
