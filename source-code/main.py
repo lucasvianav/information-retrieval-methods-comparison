@@ -60,14 +60,18 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
         dcg = metrics['probab']['dcg'][0]
         interpol = metrics['probab']['interpol'][0]
 
-        metrics['probab']['dcg'][0]      = get_sum(dcg, evalProb.getDCG()[0])
-        metrics['probab']['dcg'][1]      = get_sum(dcg, evalProb.getDCG()[1])
-        metrics['probab']['interpol'][0] = get_sum(interpol,
-                                                   evalProb.getInterpol()[0])
-        metrics['probab']['interpol'][1] = evalProb.getInterpol()[1]
+        metrics['probab']['dcg'] = (
+            get_sum(dcg, evalProb.getDCG()[0]),
+            get_sum(dcg, evalProb.getDCG()[1])
+        )
+
+        metrics['probab']['interpol'] = (
+            get_sum(interpol, evalProb.getInterpol()[0]),
+            evalProb.getInterpol()[1]
+        )
 
 
-        # saves this query's probabilistic vectorial metrics
+        # saves this query's vectorial evaluation metrics
         metrics['vectorial']['precision'] += evalVect.getPrecision()
         metrics['vectorial']['recall']    += evalVect.getRecall()
         metrics['vectorial']['map']       += evalVect.getMAP()
@@ -75,11 +79,15 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
         dcg = metrics['vectorial']['dcg'][0]
         interpol = metrics['vectorial']['interpol'][0]
 
-        metrics['vectorial']['dcg'][0]      = get_sum(dcg, evalVect.getDCG()[0])
-        metrics['vectorial']['dcg'][1]      = get_sum(dcg, evalVect.getDCG()[1])
-        metrics['vectorial']['interpol'][0] = get_sum(interpol,
-                                                   evalVect.getInterpol()[0])
-        metrics['vectorial']['interpol'][1] = evalVect.getInterpol()[1]
+        metrics['vectorial']['dcg'] = (
+            get_sum(dcg, evalVect.getDCG()[0]),
+            get_sum(dcg, evalVect.getDCG()[1])
+        )
+
+        metrics['vectorial']['interpol'] = (
+            get_sum(interpol, evalVect.getInterpol()[0]),
+            evalVect.getInterpol()[1]
+        )
 
 
     no_queries = len(queries)
