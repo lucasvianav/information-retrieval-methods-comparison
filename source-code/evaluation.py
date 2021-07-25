@@ -142,7 +142,10 @@ class Evaluation:
                 i for i, rec in enumerate(raw['recall'])
                 if rec >= recall
             ]
-            return_value[0].append(max([raw['precision'][i] for i in filtered]))
+            return_value[0].append(
+                max([raw['precision'][i] for i in filtered])
+                if filtered else 0.
+            )
 
         return return_value
 
