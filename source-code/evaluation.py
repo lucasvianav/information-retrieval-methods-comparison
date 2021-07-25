@@ -98,7 +98,8 @@ class Evaluation:
             float: parcial precision at N.
         """
 
-        intersection = get_intersection(self.__returned_set[:(N+1)], self.__truth_set)
+        intersection = get_intersection(self.__returned_set[:(N+1)],
+                                        self.__truth_set)
         return len(intersection)/(N+1)
 
     def __recallAtN(self, N: int) -> float:
