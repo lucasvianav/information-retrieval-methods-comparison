@@ -20,16 +20,16 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
             'precision': 0.,
             'recall':    0.,
             'map':       0.,
-            'interpol':  ([], []),
-            'dcg':       ([], [])
+            'interpol':  ([0.] * 11, [0.] * 11),
+            'dcg':       ([0.] * 15, [0.] * 15)
         },
 
         'vectorial': {
             'precision': 0.,
             'recall':    0.,
             'map':       0.,
-            'interpol':  ([], []),
-            'dcg':       ([], [])
+            'interpol':  ([0.] * 11, [0.] * 11),
+            'dcg':       ([0.] * 15, [0.] * 15)
         }
     }
 
