@@ -1,5 +1,7 @@
+import math
 from functools import reduce
 
+import scipy.sparse as sp_sparse
 from util import *
 
 
@@ -337,3 +339,39 @@ class Index:
         """
 
         return self.words_in_doc[doc].count(word)
+
+    def get_tdm(self, filename: str):
+        number_of_documents_in_database = self.get_n_docs()
+        unique_words = self.get_all_words()
+        number_of_unique_words = len(unique_words)
+
+        # creating TDM base (Term Document Matrix)
+        tdm = sp_sparse.lil_matrix((number_of_unique_words,
+                                    number_of_documents_in_database))
+
+        for i in range(number_of_unique_words):
+            word = unique_words[i]
+
+            # list of document and frequency in document
+            # of word word
+            postings = self.get_posting_list(word)
+
+            # Number of documents containg word word
+            ni = self.get_n_docs_containing(word)
+
+            idf = math.log2(number_of_documents_in_database/ni)
+
+            # populate TDM
+            for node in postings:
+                docName = node["doc"]
+                docId = self.get_doc_id(docName)
+                frequency_in_doc = node["freq"]
+
+                # Populating TDM
+                tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
+
+        # converting to more efficient type of sparse matrix
+        tdm_csr = tdm.tocsr()
+
+        # saves matrix to disk
+        sp_sparse.save_npz(f'{filename}.npz', tdm_csr)
