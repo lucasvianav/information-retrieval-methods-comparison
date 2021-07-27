@@ -117,6 +117,8 @@ def vectorialModel(query: list, index: Index, tdm: sp_sparse.csr_matrix = None) 
     # populates the query vector
     query_set = set(query)
     for word in query_set:
+        if not word in unique_words: continue
+
         # number of documents containg word word
         ni = index.get_n_docs_containing(word)
         idf = math.log2(number_of_documents_in_database/ni)
