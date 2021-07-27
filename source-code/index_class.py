@@ -340,7 +340,7 @@ class Index:
 
         return self.words_in_doc[doc].count(word)
 
-    def get_tdm(self, filename: str):
+    def get_tdm(self, filename: str) -> sp_sparse.csr_matrix:
         number_of_documents_in_database = self.get_n_docs()
         unique_words = self.get_all_words()
         number_of_unique_words = len(unique_words)
@@ -375,3 +375,5 @@ class Index:
 
         # saves matrix to disk
         sp_sparse.save_npz(f'{filename}.npz', tdm_csr)
+
+        return tdm_csr

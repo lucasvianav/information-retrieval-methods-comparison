@@ -91,7 +91,7 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> list:
     # returns only the doc names
     return [ doc['doc'] for doc in answer ]
 
-def vectorialModel(query: list, index: Index) -> list:
+def vectorialModel(query: list, index: Index, tdm: sp_sparse.csr_matrix = None) -> list:
     """
     Applies the vectorial model for information retrieval to calculate the
     similarity between the query and the indexed documents (considering the
@@ -106,55 +106,37 @@ def vectorialModel(query: list, index: Index) -> list:
               being the rank value of document with given query.
     """
 
-    documents = index.get_all_docs_names()
+    documents                       = index.get_all_docs_names()
     number_of_documents_in_database = index.get_n_docs()
-    unique_words = index.get_all_words()
-    number_of_unique_words = len(unique_words)
-
-    # creating TDM base (Term Document Matrix)
-    tdm = sp_sparse.lil_matrix((number_of_unique_words,
-                                number_of_documents_in_database))
+    unique_words                    = index.get_all_words()
+    number_of_unique_words          = len(unique_words)
 
     # creating query vector
     query_vector = sp_sparse.lil_matrix((1, number_of_unique_words))
 
-    for i in range(number_of_unique_words):
-        word = unique_words[i]
-
-        # list of document and frequency in document
-        # of word word
-        postings = index.get_posting_list(word)
-
-        # Number of documents containg word word
+    # populates the query vector
+    query_set = set(query)
+    for word in query_set:
+        # number of documents containg word word
         ni = index.get_n_docs_containing(word)
-
         idf = math.log2(number_of_documents_in_database/ni)
 
-        # populates the query vector
-        if word in query: query_vector[0, i] = (1 + math.log2(query.count(word)))*idf
+        # word's index on the vocabulary
+        i = unique_words.index(word)
 
-        # populate TDM
-        for node in postings:
-            docName = node["doc"]
-            docId = index.get_doc_id(docName)
-            frequency_in_doc = node["freq"]
-
-            # Populating TDM
-            tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
-
+        query_vector[0, i] = (1 + math.log2(query.count(word)))*idf
 
     # creating norm
     norm = tdm.power(2).sum(axis=0).A[0]
 
     # converting to more efficient type of sparse matrix
     query_vector_csr = query_vector.tocsr()
-    tdm_csr = tdm.tocsr()
 
     # ranking documents for answer
     answer = []
 
     for j, doc in enumerate(documents):
-        similarity = query_vector_csr.dot(tdm_csr.getcol(j)).A[0][0]
+        similarity = query_vector_csr.dot(tdm.getcol(j)).A[0][0]
         similarity  /= math.sqrt(norm[j])
 
         if similarity > 10**-2:
