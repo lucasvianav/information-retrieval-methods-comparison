@@ -3,6 +3,7 @@ from functools import reduce
 
 import scipy.sparse as sp_sparse
 from index_class import Index
+from scipy.sparse import csc_matrix
 from util import get_intersection
 
 
@@ -91,7 +92,7 @@ def probabilisticModel(query: list, index: Index, relevant_docs = []) -> list:
     # returns only the doc names
     return [ doc['doc'] for doc in answer ]
 
-def vectorialModel(query: list, index: Index, tdm: sp_sparse.csr_matrix = None) -> list:
+def vectorialModel(query: list, index: Index, tdm: csc_matrix = None) -> list:
     """
     Applies the vectorial model for information retrieval to calculate the
     similarity between the query and the indexed documents (considering the
@@ -100,6 +101,8 @@ def vectorialModel(query: list, index: Index, tdm: sp_sparse.csr_matrix = None) 
     Parameters:
         query (list): list of query's words/tokens.
         index (Index): database index (instance of the Index class).
+        tdm (csc_matrix | None): the index's Term-Document Matrix - if none is
+                                 provided, a new one will be generated.
 
     Return value:
         list: tuples with first element being doc name and the second
@@ -110,6 +113,9 @@ def vectorialModel(query: list, index: Index, tdm: sp_sparse.csr_matrix = None) 
     number_of_documents_in_database = index.get_n_docs()
     unique_words                    = index.get_all_words()
     number_of_unique_words          = len(unique_words)
+
+    # if the tdm was not provided, generates a new one
+    if tdm is None: tdm = index.get_tdm()
 
     # creating query vector
     query_vector = sp_sparse.lil_matrix((1, number_of_unique_words))
@@ -132,13 +138,13 @@ def vectorialModel(query: list, index: Index, tdm: sp_sparse.csr_matrix = None) 
     norm = tdm.power(2).sum(axis=0).A[0]
 
     # converting to more efficient type of sparse matrix
-    query_vector_csr = query_vector.tocsr()
+    query_vector = query_vector.tocsr()
 
     # ranking documents for answer
     answer = []
 
     for j, doc in enumerate(documents):
-        similarity = query_vector_csr.dot(tdm.getcol(j)).A[0][0]
+        similarity = query_vector.dot(tdm.getcol(j)).A[0][0]
         similarity  /= math.sqrt(norm[j])
 
         if similarity > 10**-2:

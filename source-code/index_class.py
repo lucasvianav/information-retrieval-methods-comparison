@@ -340,7 +340,7 @@ class Index:
 
         return self.words_in_doc[doc].count(word)
 
-    def get_tdm(self, filename: str) -> sp_sparse.csr_matrix:
+    def get_tdm(self) -> sp_sparse.csc_matrix:
         """
         The getter for the index's Term-Document Matrix.
 
@@ -348,7 +348,7 @@ class Index:
             filename (str): the name of the file to cache the matrix in.
 
         Return value:
-            csr_matrix: the TDM matrix.
+            csc_matrix: the TDM matrix.
         """
 
         number_of_documents_in_database = self.get_n_docs()
@@ -381,10 +381,4 @@ class Index:
                 tdm[i, docId] = (1 + math.log2(frequency_in_doc))*idf
 
         # converting to more efficient type of sparse matrix
-        tdm_csr = tdm.tocsr()
-
-        # saves matrix to disk
-        if filename.endswith('.npz'): filename = filename.replace('.npz', '')
-        sp_sparse.save_npz(f'{filename}.npz', tdm_csr)
-
-        return tdm_csr
+        return tdm.tocsc()

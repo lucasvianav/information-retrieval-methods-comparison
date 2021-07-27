@@ -14,11 +14,21 @@ truth_sets = get_queries_truth_set()
 
 # loads TDM from file if it exists
 # generates a new one if it doesn't
-def loadTDM(index: Index) -> sp_sparse.csr_matrix:
+def loadTDM(index: Index) -> sp_sparse.csc_matrix:
     fname = f'STOP-{index.filter_stopwords}_STEM-{index.stem_words}.npz'
     exists_cache = isfile(fname)
 
-    return sp_sparse.load_npz(fname) if exists_cache else index.get_tdm(fname)
+    # loads matrix from disk if it exists
+    if exists_cache: tdm = sp_sparse.load_npz(fname)
+
+    # calculates it if it doesn't
+    else:
+        tdm = index.get_tdm()
+
+        # saves matrix to disk
+        sp_sparse.save_npz(f'{fname}.npz', tdm)
+
+    return tdm
 
 def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
     index = Index(database_contents, filter_stopwords, stem_words)
