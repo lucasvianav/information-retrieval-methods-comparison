@@ -1,5 +1,7 @@
 import gc
+from os.path import isfile
 
+import scipy.sparse as sp_sparse
 from evaluation import Evaluation
 from index_class import Index
 from methods import probabilisticModel, vectorialModel
@@ -10,8 +12,18 @@ database_contents = get_db_content()
 queries = get_queries()
 truth_sets = get_queries_truth_set()
 
+# loads TDM from file if it exists
+# generates a new one if it doesn't
+def loadTDM(index: Index) -> sp_sparse.csr_matrix:
+    fname = f'STOP-{index.filter_stopwords}_STEM-{index.stem_words}.npz'
+    exists_cache = isfile(fname)
+
+    return sp_sparse.load_npz(fname) if exists_cache else index.get_tdm(fname)
+
 def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
     index = Index(database_contents, filter_stopwords, stem_words)
+
+    tdm = loadTDM(index)
 
     # interpol: first list is precision and second is recall
     # dcg: first item is DCG and second is IDCG
@@ -83,7 +95,7 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
         # VECTORIAL MODEL _________________
 
         # the returned ranking for the vectorial model
-        vectorial = vectorialModel(query_vector, index)
+        vectorial = vectorialModel(query_vector, index, tdm)
 
         # exands the query if necessary
         if expand_queries:
