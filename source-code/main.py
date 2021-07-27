@@ -26,7 +26,7 @@ def loadTDM(index: Index) -> sp_sparse.csc_matrix:
         tdm = index.get_tdm()
 
         # saves matrix to disk
-        sp_sparse.save_npz(f'{fname}.npz', tdm)
+        sp_sparse.save_npz(fname, tdm)
 
     return tdm
 
