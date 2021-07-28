@@ -68,7 +68,12 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
 
         # exands the query if necessary
         if expand_queries:
-            new_query = implicit_feedback(index, query_vector, probabilistic, 2)
+            new_query = implicit_feedback(index, query_vector,
+                                          probabilistic[:15], 2)
+
+            del probabilistic
+            gc.collect()
+
             probabilistic = probabilisticModel(new_query, index)
 
         # evaluation for the probabilistic model
@@ -109,7 +114,12 @@ def getMetrics(filter_stopwords: bool, stem_words: bool, expand_queries: bool):
 
         # exands the query if necessary
         if expand_queries:
-            new_query = implicit_feedback(index, query_vector, vectorial, 2)
+            new_query = implicit_feedback(index, query_vector,
+                                          vectorial[:15], 2)
+
+            del vectorial
+            gc.collect()
+
             vectorial = vectorialModel(new_query, index)
 
         # evaluation for the vectorial model
