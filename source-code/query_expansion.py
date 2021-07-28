@@ -1,4 +1,4 @@
-import numpy as np
+import scipy.sparse as sp_sparse
 from index_class import Index
 from util import extract_lists
 
@@ -21,18 +21,27 @@ def implicit_feedback(index: Index, query: list, ranking: list, N: int) -> list:
     retrieved_vocabulary = index.get_all_words_in_docs(ranking) # V_l
 
     # matrix with the frequency of each word in each doc
-    term_doc_matrix = np.array([  # M_l
-        [ index.get_frequency_in_doc(word, doc) for doc in ranking ]
-        for word in retrieved_vocabulary
-    ])
+    term_doc_matrix = sp_sparse.lil_matrix((len(retrieved_vocabulary),
+                                            len(ranking)))
+
+    # populates the TDM
+    for i, word in enumerate(retrieved_vocabulary):
+        for j, doc in enumerate(ranking):
+            term_doc_matrix[i, j] = index.get_frequency_in_doc(word, doc)
+
+    term_doc_matrix = term_doc_matrix.tocsr()
+    transposed_tdm = term_doc_matrix.transpose()
 
     # matrix correlating the words with each other
-    term_term_correlation_matrix = term_doc_matrix.dot(term_doc_matrix.T) # C_l
+    term_term_correlation_matrix = term_doc_matrix.dot(transposed_tdm) # C_l
 
+
+    c = term_term_correlation_matrix.todok() # c_(u, v)
 
     # normalized matrix correlating the words with each other
-    normalized_correlation_matrix = np.zeros(term_term_correlation_matrix.shape) # C_l'
-    c = term_term_correlation_matrix # c_(u, v)
+    normalized_correlation_matrix = sp_sparse.dok_matrix(c.shape) # C_l'
+
+    # populates the normalized correlation matrix
     for u in range(normalized_correlation_matrix.shape[0]):
         for v in range(normalized_correlation_matrix.shape[1]):
             normalized_correlation_matrix[u, v] = c[u, v]/(c[u, u] + c[v, v] - c[u, v])
