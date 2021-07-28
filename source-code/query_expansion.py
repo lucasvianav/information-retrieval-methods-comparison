@@ -22,7 +22,8 @@ def implicit_feedback(index: Index, query: list, ranking: list, N: int) -> list:
 
     # matrix with the frequency of each word in each doc
     term_doc_matrix = np.array([  # M_l
-        [ index.get_frequency_in_doc(word, doc) for word in retrieved_vocabulary ] for doc in ranking
+        [ index.get_frequency_in_doc(word, doc) for doc in ranking ]
+        for word in retrieved_vocabulary
     ])
 
     # matrix correlating the words with each other
@@ -50,18 +51,23 @@ def implicit_feedback(index: Index, query: list, ranking: list, N: int) -> list:
         # gets all correlations for each token in the query
         raw = [
             [
-                { 'word': word, 'correlation': normalized_correlation_matrix[retrieved_vocabulary.index(q), v] }
-                for v, word in enumerate(retrieved_vocabulary) if word != q
-            ] for q in query
+                {
+                    'word': word,
+                    'correlation': normalized_correlation_matrix[
+                        retrieved_vocabulary.index(token), v
+                    ]
+                }
+                for v, word in enumerate(retrieved_vocabulary) if word != token
+            ] for token in query if token in retrieved_vocabulary
         ]
 
         return extract_lists([
-            list(map(
-                lambda e: e['word'], # selects only the actual word
-                sorted(l, key=lambda e: e['correlation']) # sorts by correlation
-            ))[:N] # gets only the topmost N words
+            [
+                e['word'] for e in
+                sorted(token, key=lambda e: e['correlation'])
+            ][:N] # gets only the topmost N words
 
-            for l in raw # for each token in the query
+            for token in raw # for each token in the query
         ])
 
     # the expanded query
