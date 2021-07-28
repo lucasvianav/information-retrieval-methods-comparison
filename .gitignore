@@ -4,6 +4,8 @@ data/
 data/*
 Session.vim
 .vim
+cached-tdm/
+cached-tdm/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
