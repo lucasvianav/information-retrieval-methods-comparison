@@ -36,10 +36,10 @@ def implicit_feedback(index: Index, query: list, ranking: list, N: int) -> list:
     term_term_correlation_matrix = term_doc_matrix.dot(transposed_tdm) # C_l
 
 
-    c = term_term_correlation_matrix.todok() # c_(u, v)
+    c = term_term_correlation_matrix.tolil() # c_(u, v)
 
     # normalized matrix correlating the words with each other
-    normalized_correlation_matrix = sp_sparse.dok_matrix(c.shape) # C_l'
+    normalized_correlation_matrix = sp_sparse.lil_matrix(c.shape) # C_l'
 
     # populates the normalized correlation matrix
     for u in range(normalized_correlation_matrix.shape[0]):
