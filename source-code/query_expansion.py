@@ -26,7 +26,7 @@ def implicit_feedback(index: Index, query: list, ranking: list, N: int) -> list:
     ])
 
     # matrix correlating the words with each other
-    term_term_correlation_matrix = term_doc_matrix * term_doc_matrix.T # C_l
+    term_term_correlation_matrix = term_doc_matrix.dot(term_doc_matrix.T) # C_l
 
 
     # normalized matrix correlating the words with each other
