@@ -1,1 +1,0 @@
-# information-retrieval-methods-comparison
